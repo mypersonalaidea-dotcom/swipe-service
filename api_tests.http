@@ -1,0 +1,133 @@
+### SwipeBuddy API Test Collection
+### Prerequisites: Install the "REST Client" extension in VS Code to run these directly.
+
+@baseUrl = http://localhost:5000/api/v1
+@token = {{login.response.body.data.token}}
+
+### ==========================================
+### 1. AUTH MODULE
+### ==========================================
+
+### 1.1 Signup a new user
+# @name signup
+POST {{baseUrl}}/auth/signup
+Content-Type: application/json
+
+{
+  "name": "Aditya Sharma",
+  "email": "aditya@swipebuddy.local",
+  "password": "password123",
+  "phone": "9876543210"
+}
+
+### 1.2 Login (Sets the token variable automatically for subsequent requests)
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "aditya@swipebuddy.local",
+  "password": "password123"
+}
+
+### 1.3 Login with invalid credentials (Negative Test Case)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "aditya@swipebuddy.local",
+  "password": "wrongpassword"
+}
+
+
+### ==========================================
+### 2. MASTER / LOOKUP MODULE
+### ==========================================
+
+### 2.1 Get Degrees
+GET {{baseUrl}}/master/degrees
+
+### 2.2 Get Positions
+GET {{baseUrl}}/master/positions
+
+### 2.3 Get Companies
+GET {{baseUrl}}/master/companies
+
+### 2.4 Get Institutions
+GET {{baseUrl}}/master/institutions
+
+### 2.5 Get Habits
+GET {{baseUrl}}/master/habits
+
+### 2.6 Get Amenities
+GET {{baseUrl}}/master/amenities
+
+
+### ==========================================
+### 3. PROFILE MODULE
+### ==========================================
+
+### 3.1 Get My Profile (Requires Token)
+GET {{baseUrl}}/profile
+Authorization: Bearer {{token}}
+
+### 3.2 Update My Profile (Requires Token)
+PUT {{baseUrl}}/profile
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "age": 24,
+  "gender": "male",
+  "city": "Bengaluru",
+  "state": "Karnataka",
+  "search_type": "flat",
+  "is_published": true
+}
+
+### 3.3 Get My Profile again to verify updates
+GET {{baseUrl}}/profile
+Authorization: Bearer {{token}}
+
+### 3.4 Get Profile by UUID
+# Replace the UUID with a valid user id from your DB
+GET {{baseUrl}}/profile/00000000-0000-0000-0000-000000000000
+
+
+### ==========================================
+### 4. FLATS MODULE
+### ==========================================
+
+### 4.1 Get All Published Flats
+GET {{baseUrl}}/flats
+
+### 4.2 Create a Flat (Requires Token)
+# @name createFlat
+POST {{baseUrl}}/flats
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "address": "123 Startup Avenue",
+  "city": "Bengaluru",
+  "state": "Karnataka",
+  "pincode": "560001",
+  "latitude": 12.9716,
+  "longitude": 77.5946,
+  "furnishing_type": "furnished",
+  "description": "Awesome 3BHK to share",
+  "is_published": true
+}
+
+### 4.3 Get Flat By ID
+# Replaces with the ID retrieved from createFlat
+GET {{baseUrl}}/flats/{{createFlat.response.body.data.id}}
+
+### 4.4 Create a Flat WITHOUT Token (Negative Test Case)
+POST {{baseUrl}}/flats
+Content-Type: application/json
+
+{
+  "address": "123 Startup Avenue",
+  "city": "Bengaluru"
+}

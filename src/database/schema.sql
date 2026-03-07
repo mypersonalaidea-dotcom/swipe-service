@@ -1,0 +1,2 @@
+-- Database schema SQL 
+-- Automatically managed by Prisma, but manual migration scripts go here.

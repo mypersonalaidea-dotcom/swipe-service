@@ -1,0 +1,573 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                  String    @db.VarChar(255)
+  email                 String    @unique @db.VarChar(255)
+  phone                 String?   @unique @db.VarChar(20)
+  password_hash         String
+  age                   Int?
+  gender                String?   @db.VarChar(20)
+  city                  String?   @db.VarChar(100)
+  state                 String?   @db.VarChar(100)
+  profile_picture_url   String?
+  search_type           String?   @default("both") @db.VarChar(20)
+  phone_verified        Boolean?  @default(false)
+  email_verified        Boolean?  @default(false)
+  is_published          Boolean?  @default(false)
+  last_login_at         DateTime? @db.Timestamptz()
+  status                String?   @default("active") @db.VarChar(20)
+  created_at            DateTime? @default(now()) @db.Timestamptz()
+  updated_at            DateTime? @default(now()) @db.Timestamptz()
+
+  job_experiences       UserJobExperience[]
+  education_experiences UserEducationExperience[]
+  user_habits           UserHabit[]
+  looking_for_habits    UserLookingForHabit[]
+  flats                 Flat[]
+  conversations         Conversation[]              @relation("InitiatedBy")
+  conversation_parts    ConversationParticipant[]
+  messages              Message[]
+  saved_profiles        SavedProfile[]              @relation("UserSavedProfiles")
+  saved_by_profiles     SavedProfile[]              @relation("SavedByProfiles")
+  profile_swipes        ProfileSwipe[]              @relation("UserSwipes")
+  swiped_profiles       ProfileSwipe[]              @relation("SwipedProfiles")
+  reports_made          UserReport[]                @relation("Reporter")
+  reports_received      UserReport[]                @relation("Reported")
+  reports_resolved      UserReport[]                @relation("Resolver")
+  blocks_made           UserBlock[]                 @relation("Blocker")
+  blocks_received       UserBlock[]                 @relation("Blocked")
+  search_preferences    UserSearchPreference?
+  filter_habits         UserFilterHabit[]
+  filter_amenities      UserFilterAmenity[]
+  filter_companies      UserFilterCompany[]
+  filter_institutions   UserFilterInstitution[]
+
+  master_degrees_submitted      MasterDegree[]        @relation("SubmittedDegrees")
+  master_positions_submitted    MasterPosition[]      @relation("SubmittedPositions")
+  master_companies_submitted    MasterCompany[]       @relation("SubmittedCompanies")
+  master_institutions_submitted MasterInstitution[]   @relation("SubmittedInstitutions")
+
+  @@index([email])
+  @@index([phone])
+  @@index([city])
+  @@index([search_type])
+  @@index([status])
+  @@index([is_published])
+  @@map("users")
+}
+
+model MasterDegree {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  full_name             String    @db.VarChar(255)
+  common_name           String    @unique @db.VarChar(100)
+  other_names           String[]
+  submitted_by          String?   @db.Uuid
+  status                String?   @default("active") @db.VarChar(20)
+  created_at            DateTime? @default(now()) @db.Timestamptz()
+  updated_at            DateTime? @default(now()) @db.Timestamptz()
+
+  user                  User?     @relation("SubmittedDegrees", fields: [submitted_by], references: [id])
+  education_experiences UserEducationExperience[]
+
+  @@map("master_degrees")
+}
+
+model MasterPosition {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  full_name       String    @db.VarChar(255)
+  common_name     String    @unique @db.VarChar(100)
+  other_names     String[]
+  submitted_by    String?   @db.Uuid
+  status          String?   @default("active") @db.VarChar(20)
+  created_at      DateTime? @default(now()) @db.Timestamptz()
+  updated_at      DateTime? @default(now()) @db.Timestamptz()
+
+  user            User?     @relation("SubmittedPositions", fields: [submitted_by], references: [id])
+  job_experiences UserJobExperience[]
+
+  @@map("master_positions")
+}
+
+model MasterCompany {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String    @db.VarChar(255)
+  aliases         String[]
+  logo_url        String?
+  website         String?
+  submitted_by    String?   @db.Uuid
+  status          String?   @default("active") @db.VarChar(20)
+  created_at      DateTime? @default(now()) @db.Timestamptz()
+  updated_at      DateTime? @default(now()) @db.Timestamptz()
+
+  user            User?     @relation("SubmittedCompanies", fields: [submitted_by], references: [id])
+  job_experiences UserJobExperience[]
+  filter_companies UserFilterCompany[]
+
+  @@map("master_companies")
+}
+
+model MasterInstitution {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                  String    @db.VarChar(255)
+  aliases               String[]
+  logo_url              String?
+  city                  String?   @db.VarChar(100)
+  state                 String?   @db.VarChar(100)
+  submitted_by          String?   @db.Uuid
+  status                String?   @default("active") @db.VarChar(20)
+  created_at            DateTime? @default(now()) @db.Timestamptz()
+  updated_at            DateTime? @default(now()) @db.Timestamptz()
+
+  user                  User?     @relation("SubmittedInstitutions", fields: [submitted_by], references: [id])
+  education_experiences UserEducationExperience[]
+  filter_institutions   UserFilterInstitution[]
+
+  @@map("master_institutions")
+}
+
+model MasterHabit {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  category           String    @db.VarChar(50)
+  label              String    @unique @db.VarChar(100)
+  icon_name          String?   @db.VarChar(50)
+  display_order      Int?      @default(0)
+  status             String?   @default("active") @db.VarChar(20)
+  created_at         DateTime? @default(now()) @db.Timestamptz()
+  updated_at         DateTime? @default(now()) @db.Timestamptz()
+
+  user_habits        UserHabit[]
+  looking_for_habits UserLookingForHabit[]
+  filter_habits      UserFilterHabit[]
+
+  @@map("master_habits")
+}
+
+model MasterAmenity {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                  String    @unique @db.VarChar(100)
+  amenity_type          String    @db.VarChar(20)
+  icon_name             String?   @db.VarChar(50)
+  display_order         Int?      @default(0)
+  status                String?   @default("active") @db.VarChar(20)
+  created_at            DateTime? @default(now()) @db.Timestamptz()
+  updated_at            DateTime? @default(now()) @db.Timestamptz()
+
+  room_amenities        RoomAmenity[]
+  flat_common_amenities FlatCommonAmenity[]
+  filter_amenities      UserFilterAmenity[]
+
+  @@map("master_amenities")
+}
+
+model UserJobExperience {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id           String    @db.Uuid
+  company_id        String?   @db.Uuid
+  position_id       String?   @db.Uuid
+  company_name      String?   @db.VarChar(255)
+  position_name     String?   @db.VarChar(255)
+  from_year         String?   @db.VarChar(4)
+  till_year         String?   @db.VarChar(4)
+  currently_working Boolean?  @default(false)
+  display_order     Int?      @default(0)
+  status            String?   @default("active") @db.VarChar(20)
+  created_at        DateTime? @default(now()) @db.Timestamptz()
+  updated_at        DateTime? @default(now()) @db.Timestamptz()
+
+  user              User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  company           MasterCompany?  @relation(fields: [company_id], references: [id])
+  position          MasterPosition? @relation(fields: [position_id], references: [id])
+
+  @@index([user_id])
+  @@index([company_id])
+  @@index([position_id])
+  @@map("user_job_experiences")
+}
+
+model UserEducationExperience {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id          String    @db.Uuid
+  institution_id   String?   @db.Uuid
+  degree_id        String?   @db.Uuid
+  institution_name String?   @db.VarChar(255)
+  degree_name      String?   @db.VarChar(255)
+  start_year       String?   @db.VarChar(4)
+  end_year         String?   @db.VarChar(4)
+  display_order    Int?      @default(0)
+  status           String?   @default("active") @db.VarChar(20)
+  created_at       DateTime? @default(now()) @db.Timestamptz()
+  updated_at       DateTime? @default(now()) @db.Timestamptz()
+
+  user             User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  institution      MasterInstitution? @relation(fields: [institution_id], references: [id])
+  degree           MasterDegree?      @relation(fields: [degree_id], references: [id])
+
+  @@index([user_id])
+  @@index([institution_id])
+  @@index([degree_id])
+  @@map("user_education_experiences")
+}
+
+model UserHabit {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String    @db.Uuid
+  habit_id   String    @db.Uuid
+  status     String?   @default("active") @db.VarChar(20)
+  created_at DateTime? @default(now()) @db.Timestamptz()
+  updated_at DateTime? @default(now()) @db.Timestamptz()
+
+  user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  habit      MasterHabit @relation(fields: [habit_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, habit_id])
+  @@index([user_id])
+  @@map("user_habits")
+}
+
+model UserLookingForHabit {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String    @db.Uuid
+  habit_id   String    @db.Uuid
+  status     String?   @default("active") @db.VarChar(20)
+  created_at DateTime? @default(now()) @db.Timestamptz()
+  updated_at DateTime? @default(now()) @db.Timestamptz()
+
+  user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  habit      MasterHabit @relation(fields: [habit_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, habit_id])
+  @@index([user_id])
+  @@map("user_looking_for_habits")
+}
+
+model Flat {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id           String    @db.Uuid
+  address           String?
+  city              String?   @db.VarChar(100)
+  state             String?   @db.VarChar(100)
+  pincode           String?   @db.VarChar(10)
+  latitude          Decimal?  @db.Decimal(10, 7)
+  longitude         Decimal?  @db.Decimal(10, 7)
+  furnishing_type   String?   @db.VarChar(30)
+  description       String?
+  is_published      Boolean?  @default(false)
+  status            String?   @default("active") @db.VarChar(20)
+  created_at        DateTime? @default(now()) @db.Timestamptz()
+  updated_at        DateTime? @default(now()) @db.Timestamptz()
+
+  user              User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  rooms             Room[]
+  common_amenities  FlatCommonAmenity[]
+  media             FlatMedia[]
+
+  @@index([user_id])
+  @@index([city])
+  @@index([status])
+  @@map("flats")
+}
+
+model Room {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  flat_id           String    @db.Uuid
+  room_type         String    @db.VarChar(20)
+  rent              Decimal?  @db.Decimal(10, 2)
+  security_deposit  Decimal?  @db.Decimal(10, 2)
+  brokerage         Decimal?  @db.Decimal(10, 2)
+  available_count   Int?      @default(1)
+  available_from    DateTime? @db.Date
+  furnishing_type   String?   @db.VarChar(30)
+  display_order     Int?      @default(0)
+  status            String?   @default("active") @db.VarChar(20)
+  created_at        DateTime? @default(now()) @db.Timestamptz()
+  updated_at        DateTime? @default(now()) @db.Timestamptz()
+
+  flat              Flat      @relation(fields: [flat_id], references: [id], onDelete: Cascade)
+  room_amenities    RoomAmenity[]
+  media             RoomMedia[]
+
+  @@index([flat_id])
+  @@index([room_type])
+  @@index([rent])
+  @@map("rooms")
+}
+
+model RoomAmenity {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  room_id    String    @db.Uuid
+  amenity_id String    @db.Uuid
+  created_at DateTime? @default(now()) @db.Timestamptz()
+
+  room       Room      @relation(fields: [room_id], references: [id], onDelete: Cascade)
+  amenity    MasterAmenity @relation(fields: [amenity_id], references: [id], onDelete: Cascade)
+
+  @@unique([room_id, amenity_id])
+  @@map("room_amenities")
+}
+
+model FlatCommonAmenity {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  flat_id    String    @db.Uuid
+  amenity_id String    @db.Uuid
+  created_at DateTime? @default(now()) @db.Timestamptz()
+
+  flat       Flat      @relation(fields: [flat_id], references: [id], onDelete: Cascade)
+  amenity    MasterAmenity @relation(fields: [amenity_id], references: [id], onDelete: Cascade)
+
+  @@unique([flat_id, amenity_id])
+  @@map("flat_common_amenities")
+}
+
+model FlatMedia {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  flat_id       String    @db.Uuid
+  media_url     String
+  media_type    String?   @default("image") @db.VarChar(10)
+  display_order Int?      @default(0)
+  status        String?   @default("active") @db.VarChar(20)
+  created_at    DateTime? @default(now()) @db.Timestamptz()
+
+  flat          Flat      @relation(fields: [flat_id], references: [id], onDelete: Cascade)
+
+  @@map("flat_media")
+}
+
+model RoomMedia {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  room_id       String    @db.Uuid
+  media_url     String
+  media_type    String?   @default("image") @db.VarChar(10)
+  display_order Int?      @default(0)
+  status        String?   @default("active") @db.VarChar(20)
+  created_at    DateTime? @default(now()) @db.Timestamptz()
+
+  room          Room      @relation(fields: [room_id], references: [id], onDelete: Cascade)
+
+  @@map("room_media")
+}
+
+model Conversation {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  initiated_by      String    @db.Uuid
+  last_message_at   DateTime? @db.Timestamptz()
+  last_message_preview String?
+  status            String?   @default("active") @db.VarChar(20)
+  created_at        DateTime? @default(now()) @db.Timestamptz()
+  updated_at        DateTime? @default(now()) @db.Timestamptz()
+
+  initiator         User      @relation("InitiatedBy", fields: [initiated_by], references: [id])
+  participants      ConversationParticipant[]
+  messages          Message[]
+
+  @@index([last_message_at(sort: Desc)])
+  @@map("conversations")
+}
+
+model ConversationParticipant {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  conversation_id String    @db.Uuid
+  user_id         String    @db.Uuid
+  unread_count    Int?      @default(0)
+  muted           Boolean?  @default(false)
+  last_read_at    DateTime? @db.Timestamptz()
+  status          String?   @default("active") @db.VarChar(20)
+  created_at      DateTime? @default(now()) @db.Timestamptz()
+  updated_at      DateTime? @default(now()) @db.Timestamptz()
+
+  conversation    Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  user            User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([conversation_id, user_id])
+  @@index([user_id])
+  @@index([conversation_id])
+  @@map("conversation_participants")
+}
+
+model Message {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  conversation_id String    @db.Uuid
+  sender_id       String    @db.Uuid
+  content         String?
+  message_type    String?   @default("text") @db.VarChar(20)
+  media_url       String?
+  reply_to_id     String?   @db.Uuid
+  delivery_status String?   @default("sent") @db.VarChar(20)
+  status          String?   @default("active") @db.VarChar(20)
+  created_at      DateTime? @default(now()) @db.Timestamptz()
+  updated_at      DateTime? @default(now()) @db.Timestamptz()
+
+  conversation    Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  sender          User      @relation(fields: [sender_id], references: [id])
+  reply_to        Message?  @relation("MessageReplies", fields: [reply_to_id], references: [id])
+  replies         Message[] @relation("MessageReplies")
+
+  @@index([conversation_id, created_at(sort: Desc)])
+  @@index([sender_id])
+  @@index([delivery_status])
+  @@map("messages")
+}
+
+model SavedProfile {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id        String    @db.Uuid
+  saved_user_id  String    @db.Uuid
+  status         String?   @default("active") @db.VarChar(20)
+  created_at     DateTime? @default(now()) @db.Timestamptz()
+  updated_at     DateTime? @default(now()) @db.Timestamptz()
+
+  user           User      @relation("UserSavedProfiles", fields: [user_id], references: [id], onDelete: Cascade)
+  saved_user     User      @relation("SavedByProfiles", fields: [saved_user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, saved_user_id])
+  @@index([user_id])
+  @@map("saved_profiles")
+}
+
+model ProfileSwipe {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id        String    @db.Uuid
+  swiped_user_id String    @db.Uuid
+  direction      String    @db.VarChar(10)
+  created_at     DateTime? @default(now()) @db.Timestamptz()
+
+  user           User      @relation("UserSwipes", fields: [user_id], references: [id], onDelete: Cascade)
+  swiped_user    User      @relation("SwipedProfiles", fields: [swiped_user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([swiped_user_id])
+  @@index([direction])
+  @@index([created_at])
+  @@map("profile_swipes")
+}
+
+model UserReport {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  reporter_id      String    @db.Uuid
+  reported_user_id String    @db.Uuid
+  reason           String    @db.VarChar(50)
+  description      String?
+  context          String?   @db.VarChar(20)
+  resolved_at      DateTime? @db.Timestamptz()
+  resolved_by      String?   @db.Uuid
+  resolution       String?   @db.VarChar(50)
+  status           String?   @default("pending") @db.VarChar(20)
+  created_at       DateTime? @default(now()) @db.Timestamptz()
+  updated_at       DateTime? @default(now()) @db.Timestamptz()
+
+  reporter         User      @relation("Reporter", fields: [reporter_id], references: [id])
+  reported         User      @relation("Reported", fields: [reported_user_id], references: [id])
+  resolver         User?     @relation("Resolver", fields: [resolved_by], references: [id])
+
+  @@index([reporter_id])
+  @@index([reported_user_id])
+  @@index([status])
+  @@map("user_reports")
+}
+
+model UserBlock {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  blocker_id      String    @db.Uuid
+  blocked_user_id String    @db.Uuid
+  status          String?   @default("active") @db.VarChar(20)
+  created_at      DateTime? @default(now()) @db.Timestamptz()
+  updated_at      DateTime? @default(now()) @db.Timestamptz()
+
+  blocker         User      @relation("Blocker", fields: [blocker_id], references: [id], onDelete: Cascade)
+  blocked         User      @relation("Blocked", fields: [blocked_user_id], references: [id], onDelete: Cascade)
+
+  @@unique([blocker_id, blocked_user_id])
+  @@index([blocker_id])
+  @@index([blocked_user_id])
+  @@map("user_blocks")
+}
+
+model UserSearchPreference {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id                  String    @unique @db.Uuid
+  flat_filter_enabled      Boolean?  @default(true)
+  location_search          String?
+  location_range_km        Int?      @default(5)
+  price_min                Decimal?  @default(0) @db.Decimal(10, 2)
+  price_max                Decimal?  @default(100000) @db.Decimal(10, 2)
+  flat_types               String[]
+  furnishing_types         String[]
+  room_types               String[]
+  available_from           DateTime? @db.Date
+  brokerage_pref           String?   @db.VarChar(20)
+  security_deposit_max     Decimal?  @db.Decimal(10, 2)
+  flatmate_filter_enabled  Boolean?  @default(true)
+  flatmate_age_min         Int?      @default(18)
+  flatmate_age_max         Int?      @default(60)
+  flatmate_move_in_date    DateTime? @db.Date
+  profile_filter_enabled   Boolean?  @default(false)
+  status                   String?   @default("active") @db.VarChar(20)
+  created_at               DateTime? @default(now()) @db.Timestamptz()
+  updated_at               DateTime? @default(now()) @db.Timestamptz()
+
+  user                     User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@map("user_search_preferences")
+}
+
+model UserFilterHabit {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id        String    @db.Uuid
+  habit_id       String    @db.Uuid
+  filter_context String    @db.VarChar(20)
+  created_at     DateTime? @default(now()) @db.Timestamptz()
+
+  user           User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  habit          MasterHabit @relation(fields: [habit_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, habit_id, filter_context])
+  @@map("user_filter_habits")
+}
+
+model UserFilterAmenity {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id         String    @db.Uuid
+  amenity_id      String    @db.Uuid
+  amenity_context String    @db.VarChar(20)
+  created_at      DateTime? @default(now()) @db.Timestamptz()
+
+  user            User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  amenity         MasterAmenity @relation(fields: [amenity_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, amenity_id, amenity_context])
+  @@map("user_filter_amenities")
+}
+
+model UserFilterCompany {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String    @db.Uuid
+  company_id String    @db.Uuid
+  created_at DateTime? @default(now()) @db.Timestamptz()
+
+  user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  company    MasterCompany @relation(fields: [company_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, company_id])
+  @@map("user_filter_companies")
+}
+
+model UserFilterInstitution {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id        String    @db.Uuid
+  institution_id String    @db.Uuid
+  created_at     DateTime? @default(now()) @db.Timestamptz()
+
+  user           User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  institution    MasterInstitution @relation(fields: [institution_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, institution_id])
+  @@map("user_filter_institutions")
+}
