@@ -1,14 +1,14 @@
 ### SwipeBuddy API Test Collection
-### Prerequisites: Install the "REST Client" extension in VS Code to run these directly.
+### Install "REST Client" VS Code extension to run these inline.
 
 @baseUrl = http://localhost:5000/api/v1
 @token = {{login.response.body.data.token}}
 
-### ==========================================
-### 1. AUTH MODULE
-### ==========================================
+### =========================================
+### 1. AUTH
+### =========================================
 
-### 1.1 Signup a new user
+### 1.1 Signup
 # @name signup
 POST {{baseUrl}}/auth/signup
 Content-Type: application/json
@@ -20,7 +20,9 @@ Content-Type: application/json
   "phone": "9876543210"
 }
 
-### 1.2 Login (Sets the token variable automatically for subsequent requests)
+###
+
+### 1.2 Login  ← run this first; token is auto-captured
 # @name login
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
@@ -30,7 +32,9 @@ Content-Type: application/json
   "password": "password123"
 }
 
-### 1.3 Login with invalid credentials (Negative Test Case)
+###
+
+### 1.3 Login with wrong password (expect 401)
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
@@ -39,39 +43,57 @@ Content-Type: application/json
   "password": "wrongpassword"
 }
 
+###
 
-### ==========================================
-### 2. MASTER / LOOKUP MODULE
-### ==========================================
+### =========================================
+### 2. MASTER LOOKUPS  (global, no auth needed)
+### These are the dropdown/reference tables —
+### NOT user-specific. Use these to populate
+### UI dropdowns, then send the selected IDs
+### in the profile sub-endpoints below.
+### =========================================
 
-### 2.1 Get Degrees
+### 2.1 List all Degrees
 GET {{baseUrl}}/master/degrees
 
-### 2.2 Get Positions
+###
+
+### 2.2 List all Positions
 GET {{baseUrl}}/master/positions
 
-### 2.3 Get Companies
+###
+
+### 2.3 List all Companies
 GET {{baseUrl}}/master/companies
 
-### 2.4 Get Institutions
+###
+
+### 2.4 List all Institutions
 GET {{baseUrl}}/master/institutions
 
-### 2.5 Get Habits
+###
+
+### 2.5 List all Habits
 GET {{baseUrl}}/master/habits
 
-### 2.6 Get Amenities
+###
+
+### 2.6 List all Amenities
 GET {{baseUrl}}/master/amenities
 
+###
 
-### ==========================================
-### 3. PROFILE MODULE
-### ==========================================
+### =========================================
+### 3. PROFILE  (auth required)
+### =========================================
 
-### 3.1 Get My Profile (Requires Token)
+### 3.1 Get my own profile (includes jobs, education, habits)
 GET {{baseUrl}}/profile
 Authorization: Bearer {{token}}
 
-### 3.2 Update My Profile (Requires Token)
+###
+
+### 3.2 Update my profile
 PUT {{baseUrl}}/profile
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -85,23 +107,162 @@ Content-Type: application/json
   "is_published": true
 }
 
-### 3.3 Get My Profile again to verify updates
-GET {{baseUrl}}/profile
-Authorization: Bearer {{token}}
+###
 
-### 3.4 Get Profile by UUID
-# Replace the UUID with a valid user id from your DB
+### 3.3 View another user's profile by UUID (no auth needed)
+# Replace the UUID below with a real user id
 GET {{baseUrl}}/profile/00000000-0000-0000-0000-000000000000
 
+###
 
-### ==========================================
-### 4. FLATS MODULE
-### ==========================================
+### =========================================
+### 4. PROFILE → JOBS  (auth required)
+### IDs for company_id / position_id come
+### from GET /master/companies & /master/positions
+### =========================================
 
-### 4.1 Get All Published Flats
+### 4.1 Get my jobs
+GET {{baseUrl}}/profile/jobs
+Authorization: Bearer {{token}}
+
+###
+
+### 4.2 Add a job experience
+# @name addJob
+POST {{baseUrl}}/profile/jobs
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "company_name": "Google",
+  "position_name": "SDE",
+  "from_year": "2022",
+  "till_year": "2024",
+  "currently_working": false,
+  "display_order": 1
+}
+
+###
+
+### 4.3 Update a job experience
+# Replace :jobId with the id from addJob response
+PUT {{baseUrl}}/profile/jobs/{{addJob.response.body.data.id}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "currently_working": true,
+  "till_year": null
+}
+
+###
+
+### 4.4 Soft-delete a job experience
+DELETE {{baseUrl}}/profile/jobs/{{addJob.response.body.data.id}}
+Authorization: Bearer {{token}}
+
+###
+
+### =========================================
+### 5. PROFILE → EDUCATION  (auth required)
+### IDs for institution_id / degree_id come
+### from GET /master/institutions & /master/degrees
+### =========================================
+
+### 5.1 Get my education
+GET {{baseUrl}}/profile/education
+Authorization: Bearer {{token}}
+
+###
+
+### 5.2 Add an education entry
+# @name addEdu
+POST {{baseUrl}}/profile/education
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "institution_name": "IIT Delhi",
+  "degree_name": "B.Tech",
+  "start_year": "2018",
+  "end_year": "2022",
+  "display_order": 1
+}
+
+###
+
+### 5.3 Update an education entry
+PUT {{baseUrl}}/profile/education/{{addEdu.response.body.data.id}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "end_year": "2023"
+}
+
+###
+
+### 5.4 Soft-delete an education entry
+DELETE {{baseUrl}}/profile/education/{{addEdu.response.body.data.id}}
+Authorization: Bearer {{token}}
+
+###
+
+### =========================================
+### 6. PROFILE → MY HABITS  (auth required)
+### habit_ids come from GET /master/habits
+### This replaces ALL existing habits in one call
+### =========================================
+
+### 6.1 Get my current habits
+GET {{baseUrl}}/profile/habits
+Authorization: Bearer {{token}}
+
+###
+
+### 6.2 Set my habits (send array of habit UUIDs)
+PUT {{baseUrl}}/profile/habits
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "habit_ids": []
+}
+
+###
+
+### =========================================
+### 7. PROFILE → LOOKING-FOR HABITS  (auth required)
+### Preferred habits in a flatmate
+### =========================================
+
+### 7.1 Get my looking-for preferences
+GET {{baseUrl}}/profile/looking-for
+Authorization: Bearer {{token}}
+
+###
+
+### 7.2 Set looking-for habits
+PUT {{baseUrl}}/profile/looking-for
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "habit_ids": []
+}
+
+###
+
+### =========================================
+### 8. FLATS  (list = public, create = auth)
+### =========================================
+
+### 8.1 List published flats
 GET {{baseUrl}}/flats
 
-### 4.2 Create a Flat (Requires Token)
+###
+
+### 8.2 Create a flat (auth required)
 # @name createFlat
 POST {{baseUrl}}/flats
 Authorization: Bearer {{token}}
@@ -119,15 +280,19 @@ Content-Type: application/json
   "is_published": true
 }
 
-### 4.3 Get Flat By ID
-# Replaces with the ID retrieved from createFlat
+###
+
+### 8.3 Get flat by ID
 GET {{baseUrl}}/flats/{{createFlat.response.body.data.id}}
 
-### 4.4 Create a Flat WITHOUT Token (Negative Test Case)
+###
+
+### 8.4 Create flat without token (expect 401)
 POST {{baseUrl}}/flats
 Content-Type: application/json
 
 {
-  "address": "123 Startup Avenue",
   "city": "Bengaluru"
 }
+
+###
