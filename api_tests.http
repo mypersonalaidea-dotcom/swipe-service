@@ -16,9 +16,10 @@ Content-Type: application/json
 
 {
   "name": "Aditya Sharma",
-  "email": "aditya@swipebuddy.local",
-  "password": "password123",
-  "phone": "9876543210"
+  "age": 24,
+  "gender": "male",
+  "phone": "9876543210",
+  "password": "password123"
 }
 
 ###
@@ -29,8 +30,8 @@ POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-  "phone": "9876543210",
-  "password": "password123"
+  "phone": "9876553210",
+  "password": "pas"
 }
 
 ###

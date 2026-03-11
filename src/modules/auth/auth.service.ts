@@ -6,21 +6,25 @@ const authRepo = new AuthRepository();
 
 export class AuthService {
   async signup(data: any) {
-    if (!data.email || !data.password || !data.name || !data.phone) {
-      throw new Error('Name, Email, Phone, and Password are required');
+    if (!data.name || !data.age || !data.gender || !data.phone || !data.password) {
+      throw new Error('Name, Age, Gender, Phone, and Password are required');
     }
-
-    const existingUser = await authRepo.findUserByEmail(data.email);
-    if (existingUser) throw new Error('Email already registered');
 
     const existingPhone = await authRepo.findUserByPhone(data.phone);
     if (existingPhone) throw new Error('Phone number already registered');
 
+    if (data.email) {
+      const existingEmail = await authRepo.findUserByEmail(data.email);
+      if (existingEmail) throw new Error('Email already registered');
+    }
+
     const password_hash = await bcrypt.hash(data.password, 10);
     const user = await authRepo.createUser({
       name: data.name,
-      email: data.email,
+      age: data.age,
+      gender: data.gender,
       phone: data.phone,
+      ...(data.email && { email: data.email }),
       password_hash
     });
 
