@@ -8,4 +8,8 @@ export class AuthRepository {
   async findUserByEmail(email: string) {
     return prisma.user.findUnique({ where: { email } });
   }
+
+  async findUserByPhone(phone: string) {
+    return prisma.user.findUnique({ where: { phone } });
+  }
 }

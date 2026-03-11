@@ -6,12 +6,15 @@ const authRepo = new AuthRepository();
 
 export class AuthService {
   async signup(data: any) {
-    if (!data.email || !data.password || !data.name) {
-      throw new Error('Name, Email, and Password are required');
+    if (!data.email || !data.password || !data.name || !data.phone) {
+      throw new Error('Name, Email, Phone, and Password are required');
     }
 
     const existingUser = await authRepo.findUserByEmail(data.email);
     if (existingUser) throw new Error('Email already registered');
+
+    const existingPhone = await authRepo.findUserByPhone(data.phone);
+    if (existingPhone) throw new Error('Phone number already registered');
 
     const password_hash = await bcrypt.hash(data.password, 10);
     const user = await authRepo.createUser({
@@ -27,12 +30,23 @@ export class AuthService {
   }
 
   async login(data: any) {
-    if (!data.email || !data.password) {
-      throw new Error('Email and Password are required');
+    if (!data.password) {
+      throw new Error('Password is required');
+    }
+    if (!data.phone && !data.email) {
+      throw new Error('Phone number or Email is required');
     }
 
-    const user = await authRepo.findUserByEmail(data.email);
-    console.log('[AUTH] Login attempt for:', data.email);
+    let user: any = null;
+
+    if (data.phone) {
+      console.log('[AUTH] Login attempt for phone:', data.phone);
+      user = await authRepo.findUserByPhone(data.phone);
+    } else {
+      console.log('[AUTH] Login attempt for email:', data.email);
+      user = await authRepo.findUserByEmail(data.email);
+    }
+
     console.log('[AUTH] User found:', !!user);
 
     if (!user) throw new Error('Invalid credentials');
