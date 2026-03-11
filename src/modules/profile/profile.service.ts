@@ -2,6 +2,31 @@ import { ProfileRepository } from './profile.repository';
 
 const profileRepo = new ProfileRepository();
 
+// ─── Field whitelists ─────────────────────────────────────────────────────────
+// Only the fields listed here can ever reach the database.
+// Any extra client-supplied keys are silently dropped.
+const JOB_FIELDS = [
+  'company_id', 'position_id',
+  'company_name', 'position_name',
+  'from_year', 'till_year',
+  'currently_working', 'display_order',
+] as const;
+
+const EDUCATION_FIELDS = [
+  'institution_id', 'degree_id',
+  'institution_name', 'degree_name',
+  'start_year', 'end_year',
+  'display_order',
+] as const;
+
+function pick<T extends string>(obj: any, keys: readonly T[]): Partial<Record<T, any>> {
+  const result: Partial<Record<T, any>> = {};
+  for (const key of keys) {
+    if (obj[key] !== undefined) result[key] = obj[key];
+  }
+  return result;
+}
+
 export class ProfileService {
   async getProfile(id: string) {
     const profile = await profileRepo.findById(id);
@@ -18,7 +43,7 @@ export class ProfileService {
       city: data.city,
       state: data.state,
       search_type: data.search_type,
-      is_published: data.is_published
+      is_published: data.is_published,
     };
     Object.keys(safeData).forEach(key => safeData[key] === undefined && delete safeData[key]);
     const updated = await profileRepo.updateProfile(id, safeData);
@@ -32,11 +57,11 @@ export class ProfileService {
   }
 
   async addJob(userId: string, data: any) {
-    return profileRepo.addJob(userId, data);
+    return profileRepo.addJob(userId, pick(data, JOB_FIELDS));
   }
 
   async updateJob(jobId: string, userId: string, data: any) {
-    return profileRepo.updateJob(jobId, userId, data);
+    return profileRepo.updateJob(jobId, userId, pick(data, JOB_FIELDS));
   }
 
   async deleteJob(jobId: string, userId: string) {
@@ -49,11 +74,11 @@ export class ProfileService {
   }
 
   async addEducation(userId: string, data: any) {
-    return profileRepo.addEducation(userId, data);
+    return profileRepo.addEducation(userId, pick(data, EDUCATION_FIELDS));
   }
 
   async updateEducation(eduId: string, userId: string, data: any) {
-    return profileRepo.updateEducation(eduId, userId, data);
+    return profileRepo.updateEducation(eduId, userId, pick(data, EDUCATION_FIELDS));
   }
 
   async deleteEducation(eduId: string, userId: string) {

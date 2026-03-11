@@ -79,9 +79,9 @@ app.use('/api/v1/auth', authLimiter, authRoutes);
 // All other routes — auth is enforced PER-ROUTE inside the module
 app.use('/api/v1/profile', profileRoutes);
 app.use('/api/v1/flats', flatsRoutes);
-app.use('/api/v1/discover', matchingRoutes);
-app.use('/api/v1/conversations', messagingRoutes);
-app.use('/api/v1', socialRoutes);
+app.use('/api/v1/matching', matchingRoutes);
+app.use('/api/v1/messages', messagingRoutes);
+app.use('/api/v1/social', socialRoutes);
 app.use('/api/v1/master', masterRoutes);
 app.use('/api/v1/admin', adminRoutes);
 

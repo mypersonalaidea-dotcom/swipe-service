@@ -1,11 +1,12 @@
 ### SwipeBuddy API Test Collection
 ### Install "REST Client" VS Code extension to run these inline.
+### Run "1.2 Login" first — the token is auto-captured and reused everywhere.
 
 @baseUrl = http://localhost:5000/api/v1
 @token = {{login.response.body.data.token}}
 
 ### =========================================
-### 1. AUTH
+### 1. AUTH  (rate-limited: 20 req / 15 min)
 ### =========================================
 
 ### 1.1 Signup
@@ -46,40 +47,45 @@ Content-Type: application/json
 ###
 
 ### =========================================
-### 2. MASTER LOOKUPS  (global, no auth needed)
-### These are the dropdown/reference tables —
-### NOT user-specific. Use these to populate
-### UI dropdowns, then send the selected IDs
-### in the profile sub-endpoints below.
+### 2. MASTER LOOKUPS  (all require auth)
+### Use these to populate UI dropdowns,
+### then send the selected IDs in the
+### profile/flat endpoints below.
 ### =========================================
 
 ### 2.1 List all Degrees
 GET {{baseUrl}}/master/degrees
+Authorization: Bearer {{token}}
 
 ###
 
 ### 2.2 List all Positions
 GET {{baseUrl}}/master/positions
+Authorization: Bearer {{token}}
 
 ###
 
 ### 2.3 List all Companies
 GET {{baseUrl}}/master/companies
+Authorization: Bearer {{token}}
 
 ###
 
 ### 2.4 List all Institutions
 GET {{baseUrl}}/master/institutions
+Authorization: Bearer {{token}}
 
 ###
 
 ### 2.5 List all Habits
 GET {{baseUrl}}/master/habits
+Authorization: Bearer {{token}}
 
 ###
 
 ### 2.6 List all Amenities
 GET {{baseUrl}}/master/amenities
+Authorization: Bearer {{token}}
 
 ###
 
@@ -93,12 +99,13 @@ Authorization: Bearer {{token}}
 
 ###
 
-### 3.2 Update my profile
+### 3.2 Update my profile (all fields optional — send only what changes)
 PUT {{baseUrl}}/profile
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
+  "name": "Aditya Sharma",
   "age": 24,
   "gender": "male",
   "city": "Bengaluru",
@@ -109,7 +116,7 @@ Content-Type: application/json
 
 ###
 
-### 3.3 View another user's profile by UUID (no auth needed)
+### 3.3 View another user's public profile (no auth needed)
 # Replace the UUID below with a real user id
 GET {{baseUrl}}/profile/00000000-0000-0000-0000-000000000000
 
@@ -117,8 +124,8 @@ GET {{baseUrl}}/profile/00000000-0000-0000-0000-000000000000
 
 ### =========================================
 ### 4. PROFILE → JOBS  (auth required)
-### IDs for company_id / position_id come
-### from GET /master/companies & /master/positions
+### company_id / position_id come from
+### GET /master/companies & /master/positions
 ### =========================================
 
 ### 4.1 Get my jobs
@@ -136,6 +143,22 @@ Content-Type: application/json
 {
   "company_name": "Google",
   "position_name": "SDE",
+  "from_year": "2022",
+  "till_year": "2024",
+  "currently_working": false,
+  "display_order": 1
+}
+
+###
+
+### 4.2b Add job with master IDs (preferred when company/position exist in master)
+POST {{baseUrl}}/profile/jobs
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "company_id": "REPLACE_WITH_COMPANY_UUID",
+  "position_id": "REPLACE_WITH_POSITION_UUID",
   "from_year": "2022",
   "till_year": "2024",
   "currently_working": false,
@@ -165,8 +188,8 @@ Authorization: Bearer {{token}}
 
 ### =========================================
 ### 5. PROFILE → EDUCATION  (auth required)
-### IDs for institution_id / degree_id come
-### from GET /master/institutions & /master/degrees
+### institution_id / degree_id come from
+### GET /master/institutions & /master/degrees
 ### =========================================
 
 ### 5.1 Get my education
@@ -184,6 +207,21 @@ Content-Type: application/json
 {
   "institution_name": "IIT Delhi",
   "degree_name": "B.Tech",
+  "start_year": "2018",
+  "end_year": "2022",
+  "display_order": 1
+}
+
+###
+
+### 5.2b Add education with master IDs (preferred when institution/degree exist in master)
+POST {{baseUrl}}/profile/education
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "institution_id": "REPLACE_WITH_INSTITUTION_UUID",
+  "degree_id": "REPLACE_WITH_DEGREE_UUID",
   "start_year": "2018",
   "end_year": "2022",
   "display_order": 1
@@ -211,7 +249,8 @@ Authorization: Bearer {{token}}
 ### =========================================
 ### 6. PROFILE → MY HABITS  (auth required)
 ### habit_ids come from GET /master/habits
-### This replaces ALL existing habits in one call
+### This REPLACES all existing habits in one call.
+### Send [] to clear all habits.
 ### =========================================
 
 ### 6.1 Get my current habits
@@ -220,7 +259,7 @@ Authorization: Bearer {{token}}
 
 ###
 
-### 6.2 Set my habits (send array of habit UUIDs)
+### 6.2 Replace my habits (send array of habit UUIDs)
 PUT {{baseUrl}}/profile/habits
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -233,7 +272,8 @@ Content-Type: application/json
 
 ### =========================================
 ### 7. PROFILE → LOOKING-FOR HABITS  (auth required)
-### Preferred habits in a flatmate
+### Preferred lifestyle habits in a flatmate.
+### habit_ids come from GET /master/habits
 ### =========================================
 
 ### 7.1 Get my looking-for preferences
@@ -242,7 +282,7 @@ Authorization: Bearer {{token}}
 
 ###
 
-### 7.2 Set looking-for habits
+### 7.2 Replace looking-for habits
 PUT {{baseUrl}}/profile/looking-for
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -254,10 +294,13 @@ Content-Type: application/json
 ###
 
 ### =========================================
-### 8. FLATS  (list = public, create = auth)
+### 8. FLATS
+### GET /flats and GET /flats/:id → public
+### POST /flats → auth required
+### user_id is auto-injected from JWT
 ### =========================================
 
-### 8.1 List published flats
+### 8.1 List all published flats (no auth required)
 GET {{baseUrl}}/flats
 
 ###
@@ -282,17 +325,105 @@ Content-Type: application/json
 
 ###
 
-### 8.3 Get flat by ID
+### 8.3 Get flat by ID (no auth required)
 GET {{baseUrl}}/flats/{{createFlat.response.body.data.id}}
 
 ###
 
-### 8.4 Create flat without token (expect 401)
+### 8.4 Create flat without required fields — expect 500 (validation error)
 POST {{baseUrl}}/flats
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
   "city": "Bengaluru"
 }
+
+###
+
+### 8.5 Create flat without token — expect 401
+POST {{baseUrl}}/flats
+Content-Type: application/json
+
+{
+  "address": "123 MG Road",
+  "city": "Bengaluru",
+  "state": "Karnataka"
+}
+
+###
+
+### =========================================
+### 9. MATCHING  (auth required — stub)
+### =========================================
+
+### 9.1 Discover profiles/flats
+GET {{baseUrl}}/matching
+Authorization: Bearer {{token}}
+
+###
+
+### 9.2 Swipe on a profile or flat
+POST {{baseUrl}}/matching/swipe
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{}
+
+###
+
+### 9.3 Matching without token — expect 401
+GET {{baseUrl}}/matching
+
+###
+
+### =========================================
+### 10. MESSAGING  (auth required — stub)
+### =========================================
+
+### 10.1 List all conversations
+GET {{baseUrl}}/messages
+Authorization: Bearer {{token}}
+
+###
+
+### 10.2 Get messages for a conversation
+GET {{baseUrl}}/messages/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{token}}
+
+###
+
+### 10.3 Messaging without token — expect 401
+GET {{baseUrl}}/messages
+
+###
+
+### =========================================
+### 11. SOCIAL  (auth required — stub)
+### =========================================
+
+### 11.1 Get saved/bookmarked profiles
+GET {{baseUrl}}/social/saved-profiles
+Authorization: Bearer {{token}}
+
+###
+
+### 11.2 Report a user
+POST {{baseUrl}}/social/reports
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{}
+
+###
+
+### 11.3 Get blocked users
+GET {{baseUrl}}/social/blocks
+Authorization: Bearer {{token}}
+
+###
+
+### 11.4 Social without token — expect 401
+GET {{baseUrl}}/social/saved-profiles
 
 ###

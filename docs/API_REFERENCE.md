@@ -344,12 +344,13 @@ Add a job experience entry.
 | `currently_working` | `boolean` | ❌ No | Set `true` if this is the current job |
 | `display_order` | `number` | ❌ No | Sort order on profile (defaults to insertion order) |
 
-> **Note:** You must provide at least one of `company_id` or `company_name` to identify the company. Same applies for position.
+> **Note:** Provide at least one of `company_id` or `company_name`. Same applies for position.  
+> **Note:** Any fields not in this list are silently ignored by the server.
 
 ```json
 {
-  "company_id": "uuid-or-null",
-  "position_id": "uuid-or-null",
+  "company_id": "uuid-or-omit",
+  "position_id": "uuid-or-omit",
   "company_name": "Google",
   "position_name": "SDE",
   "from_year": "2022",
@@ -429,10 +430,12 @@ Add an education entry.
 | `end_year` | `string` | ❌ No | End year (e.g. `"2022"`) |
 | `display_order` | `number` | ❌ No | Sort order on profile |
 
+> **Note:** Any fields not in this list are silently ignored by the server.
+
 ```json
 {
-  "institution_id": "uuid-or-null",
-  "degree_id": "uuid-or-null",
+  "institution_id": "uuid-or-omit",
+  "degree_id": "uuid-or-omit",
   "institution_name": "IIT Delhi",
   "degree_name": "B.Tech",
   "start_year": "2018",
@@ -796,6 +799,8 @@ Create a new flat listing. `user_id` is injected automatically from the JWT; do 
 | `description` | `string` | ❌ No | Free-text description |
 | `is_published` | `boolean` | ❌ No | `true` to make listing publicly visible (default: `false`) |
 
+> **Note:** `user_id` is injected server-side from the JWT. Any `user_id` sent in the request body is ignored.
+
 ```json
 {
   "address": "123 MG Road",
@@ -818,7 +823,7 @@ Returns the created flat object.
 | Status | Message |
 |--------|---------|
 | `401` | `Unauthorized` |
-| `500` | Internal server error message |
+| `500` | `address, city, and state are required` |
 
 ---
 
@@ -929,3 +934,43 @@ axios.interceptors.request.use(config => {
 **Flat listing with amenities:**
 1. `GET /master/amenities` → display amenities filtered by `amenity_type`
 2. When creating flat → `POST /flats` first, then attach room/amenity data as those endpoints are added
+
+---
+
+## 10. Route Summary
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `POST` | `/auth/signup` | ❌ | Register |
+| `POST` | `/auth/login` | ❌ | Login |
+| `GET` | `/profile` | 🔒 | My full profile |
+| `PUT` | `/profile` | 🔒 | Update my profile |
+| `GET` | `/profile/:id` | ❌ | View any user's profile |
+| `GET` | `/profile/jobs` | 🔒 | My job experiences |
+| `POST` | `/profile/jobs` | 🔒 | Add job |
+| `PUT` | `/profile/jobs/:jobId` | 🔒 | Update job |
+| `DELETE` | `/profile/jobs/:jobId` | 🔒 | Soft-delete job |
+| `GET` | `/profile/education` | 🔒 | My education history |
+| `POST` | `/profile/education` | 🔒 | Add education |
+| `PUT` | `/profile/education/:eduId` | 🔒 | Update education |
+| `DELETE` | `/profile/education/:eduId` | 🔒 | Soft-delete education |
+| `GET` | `/profile/habits` | 🔒 | My habits |
+| `PUT` | `/profile/habits` | 🔒 | Replace my habits |
+| `GET` | `/profile/looking-for` | 🔒 | My flatmate habit preferences |
+| `PUT` | `/profile/looking-for` | 🔒 | Replace flatmate habit preferences |
+| `GET` | `/master/degrees` | 🔒 | All degrees |
+| `GET` | `/master/positions` | 🔒 | All positions |
+| `GET` | `/master/companies` | 🔒 | All companies |
+| `GET` | `/master/institutions` | 🔒 | All institutions |
+| `GET` | `/master/habits` | 🔒 | All habits |
+| `GET` | `/master/amenities` | 🔒 | All amenities |
+| `GET` | `/flats` | ❌ | All published flats |
+| `GET` | `/flats/:id` | ❌ | Single flat |
+| `POST` | `/flats` | 🔒 | Create flat |
+| `GET` | `/matching` | 🔒 | Discover (stub) |
+| `POST` | `/matching/swipe` | 🔒 | Swipe (stub) |
+| `GET` | `/messages` | 🔒 | Conversations (stub) |
+| `GET` | `/messages/:id` | 🔒 | Conversation messages (stub) |
+| `GET` | `/social/saved-profiles` | 🔒 | Saved profiles (stub) |
+| `POST` | `/social/reports` | 🔒 | Report user (stub) |
+| `GET` | `/social/blocks` | 🔒 | Blocked users (stub) |
