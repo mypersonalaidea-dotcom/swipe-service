@@ -8,7 +8,6 @@ const c = new ProfileController();
 // Profile
 router.get('/', authMiddleware, c.getMyProfile);
 router.put('/', authMiddleware, c.updateMyProfile);
-router.get('/:id', c.getProfileById);
 
 // Jobs (all require auth)
 router.get('/jobs', authMiddleware, c.getJobs);
@@ -29,5 +28,8 @@ router.put('/habits', authMiddleware, c.setHabits);
 // Looking-for habits (all require auth)
 router.get('/looking-for', authMiddleware, c.getLookingForHabits);
 router.put('/looking-for', authMiddleware, c.setLookingForHabits);
+
+// Public profile by ID — must be LAST to avoid swallowing named routes above
+router.get('/:id', c.getProfileById);
 
 export default router;
