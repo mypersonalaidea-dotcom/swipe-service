@@ -65,4 +65,11 @@ export class AuthService {
     const { password_hash: _, ...userWithoutPassword } = user as any;
     return { user: userWithoutPassword, token };
   }
+  async checkPhone(phone: string) {
+    if (!phone) {
+      throw new Error('Phone number is required');
+    }
+    const existingUser = await authRepo.findUserByPhone(phone);
+    return { exists: !!existingUser };
+  }
 }
