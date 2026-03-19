@@ -21,4 +21,13 @@ export class AuthController {
       res.status(401).json({ success: false, message: error.message });
     }
   }
+  async checkPhone(req: Request, res: Response) {
+    try {
+      const { phone } = req.body;
+      const data = await authService.checkPhone(phone);
+      res.status(200).json({ success: true, data });
+    } catch (error: any) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
 }
