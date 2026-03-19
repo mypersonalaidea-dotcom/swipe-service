@@ -32,6 +32,20 @@ export class FlatsService {
       if (data[key] !== undefined) safeData[key] = data[key];
     }
 
+    // Coerce lat/lng to Number for Prisma's Decimal column.
+    // If the frontend sends them as strings or they are invalid, drop them
+    // so the row is saved without coordinates rather than with bogus values.
+    if (safeData.latitude !== undefined) {
+      const lat = Number(safeData.latitude);
+      if (!isFinite(lat)) delete safeData.latitude;
+      else safeData.latitude = lat;
+    }
+    if (safeData.longitude !== undefined) {
+      const lng = Number(safeData.longitude);
+      if (!isFinite(lng)) delete safeData.longitude;
+      else safeData.longitude = lng;
+    }
+
     return await flatsRepo.createFlat(safeData);
   }
 }

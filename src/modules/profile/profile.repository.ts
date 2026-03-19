@@ -8,7 +8,21 @@ export class ProfileRepository {
         job_experiences: { include: { company: true, position: true } },
         education_experiences: { include: { institution: true, degree: true } },
         user_habits: { include: { habit: true } },
-        looking_for_habits: { include: { habit: true } }
+        looking_for_habits: { include: { habit: true } },
+        flats: {
+          where: { status: 'active' },
+          include: {
+            rooms: {
+              where: { status: 'active' },
+              include: {
+                room_amenities: { include: { amenity: true } },
+                media: true
+              }
+            },
+            common_amenities: { include: { amenity: true } },
+            media: true
+          }
+        }
       }
     });
   }
