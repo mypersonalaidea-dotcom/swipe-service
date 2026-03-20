@@ -29,11 +29,8 @@ export class OtpService {
     const hash = await bcrypt.hash(otp, 10);
     const expiresAt = new Date(Date.now() + this.OTP_TTL_MS);
 
-    // create new OTP, and mark existing as consumed in a transaction
-    const created = await (prisma as any).$transaction(async (tx: any) => {
-      await tx.phoneOtp.updateMany({ where: { phone, consumed: false }, data: { consumed: true } });
-      return tx.phoneOtp.create({ data: { phone, otp_hash: hash, expires_at: expiresAt } });
-    });
+    // use repository transactional helper
+    const created = await otpRepo.createOtpTransactional(phone, hash, expiresAt);
 
     // In dev, return OTP for testing convenience
     const devReturn = process.env.OTP_DEV_RETURN === 'true' || process.env.NODE_ENV === 'test';
