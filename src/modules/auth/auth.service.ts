@@ -1,8 +1,10 @@
 import { AuthRepository } from './auth.repository';
 import bcrypt from 'bcryptjs';
 import { generateToken } from '../../utils/jwt';
+import { OtpService } from './otp.service';
 
 const authRepo = new AuthRepository();
+const otpService = new OtpService();
 
 export class AuthService {
   async signup(data: any) {
@@ -70,6 +72,14 @@ export class AuthService {
       throw new Error('Phone number is required');
     }
     const existingUser = await authRepo.findUserByPhone(phone);
-    return { exists: !!existingUser };
+    // Always attempt to create an OTP session regardless of whether user exists or not
+    // This avoids account enumeration and starts the verification flow
+    try {
+      const otpResult = await otpService.requestOtp(phone);
+      return { exists: !!existingUser, otp_sent: true, otp_id: otpResult.id, otp: otpResult.otp };
+    } catch (err: any) {
+      if (err.code === 'RATE_LIMIT') throw new Error('Too many OTP requests, try again later');
+      throw err;
+    }
   }
 }
