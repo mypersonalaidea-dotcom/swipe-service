@@ -572,3 +572,16 @@ model UserFilterInstitution {
   @@unique([user_id, institution_id])
   @@map("user_filter_institutions")
 }
+
+model PhoneOtp {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  phone      String    @db.VarChar(20)
+  otp_hash   String
+  expires_at DateTime  @db.Timestamptz()
+  consumed   Boolean   @default(false)
+  created_at DateTime? @default(now()) @db.Timestamptz()
+
+  @@index([phone])
+  @@index([phone, consumed])
+  @@map("phone_otps")
+}
