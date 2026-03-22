@@ -585,3 +585,16 @@ model PhoneOtp {
   @@index([phone, consumed])
   @@map("phone_otps")
 }
+
+model EmailOtp {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email      String    @db.VarChar(255)
+  otp_hash   String
+  expires_at DateTime  @db.Timestamptz()
+  consumed   Boolean   @default(false)
+  created_at DateTime? @default(now()) @db.Timestamptz()
+
+  @@index([email])
+  @@index([email, consumed])
+  @@map("email_otps")
+}

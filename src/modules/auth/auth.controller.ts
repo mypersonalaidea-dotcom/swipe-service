@@ -30,4 +30,14 @@ export class AuthController {
       res.status(400).json({ success: false, message: error.message });
     }
   }
+
+  async checkEmail(req: Request, res: Response) {
+    try {
+      const { email } = req.body;
+      const data = await authService.checkEmail(email);
+      res.status(200).json({ success: true, data });
+    } catch (error: any) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
 }

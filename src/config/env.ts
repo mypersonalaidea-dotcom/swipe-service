@@ -12,4 +12,7 @@ export const env = {
   ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS || 'http://localhost:3000',
   // 2Factor.in SMS OTP API key
   TWO_FACTOR_API_KEY: process.env.TWO_FACTOR_API_KEY || '',
+  // Resend Email API key
+  RESEND_API_KEY: process.env.RESEND_API_KEY || '',
+  RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
 };

@@ -2,9 +2,11 @@ import { AuthRepository } from './auth.repository';
 import bcrypt from 'bcryptjs';
 import { generateToken } from '../../utils/jwt';
 import { OtpService } from './otp.service';
+import { EmailOtpService } from './email-otp.service';
 
 const authRepo = new AuthRepository();
 const otpService = new OtpService();
+const emailOtpService = new EmailOtpService();
 
 export class AuthService {
   async signup(data: any) {
@@ -67,6 +69,7 @@ export class AuthService {
     const { password_hash: _, ...userWithoutPassword } = user as any;
     return { user: userWithoutPassword, token };
   }
+
   async checkPhone(phone: string) {
     if (!phone) {
       throw new Error('Phone number is required');
@@ -76,6 +79,22 @@ export class AuthService {
     // This avoids account enumeration and starts the verification flow
     try {
       const otpResult = await otpService.requestOtp(phone);
+      return { exists: !!existingUser, otp_sent: true, otp_id: otpResult.id, otp: otpResult.otp };
+    } catch (err: any) {
+      if (err.code === 'RATE_LIMIT') throw new Error('Too many OTP requests, try again later');
+      throw err;
+    }
+  }
+
+  async checkEmail(email: string) {
+    if (!email) {
+      throw new Error('Email is required');
+    }
+    const existingUser = await authRepo.findUserByEmail(email);
+    // Always attempt to create an OTP session regardless of whether user exists or not
+    // This avoids account enumeration and starts the verification flow
+    try {
+      const otpResult = await emailOtpService.requestOtp(email);
       return { exists: !!existingUser, otp_sent: true, otp_id: otpResult.id, otp: otpResult.otp };
     } catch (err: any) {
       if (err.code === 'RATE_LIMIT') throw new Error('Too many OTP requests, try again later');
