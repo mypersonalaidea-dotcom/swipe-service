@@ -1,8 +1,10 @@
 import bcrypt from 'bcryptjs';
 import { OtpRepository } from './otp.repository';
 import { prisma } from '../../config/database';
+import { SmsService } from '../../utils/sms.service';
 
 const otpRepo = new OtpRepository();
+const smsService = new SmsService();
 
 function generateNumericOtp(length = 6) {
   const max = 10 ** length;
@@ -31,6 +33,16 @@ export class OtpService {
 
     // use repository transactional helper
     const created = await otpRepo.createOtpTransactional(phone, hash, expiresAt);
+
+    // Send OTP via SMS using 2Factor.in
+    try {
+      await smsService.sendOtp(phone, otp);
+      console.log(`[OTP] SMS sent successfully to ${phone}`);
+    } catch (smsError: any) {
+      console.error(`[OTP] SMS send failed for ${phone}: ${smsError.message}`);
+      // Don't fail the OTP request if SMS delivery fails — the OTP is stored in DB
+      // and can potentially be resent. Log the error for monitoring.
+    }
 
     // In dev, return OTP for testing convenience
     const devReturn = process.env.OTP_DEV_RETURN === 'true' || process.env.NODE_ENV === 'test';

@@ -10,4 +10,6 @@ export const env = {
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
   // Comma-separated list of allowed frontend origins: e.g. "https://app.swipebuddy.in,http://localhost:3000"
   ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS || 'http://localhost:3000',
+  // 2Factor.in SMS OTP API key
+  TWO_FACTOR_API_KEY: process.env.TWO_FACTOR_API_KEY || '',
 };
