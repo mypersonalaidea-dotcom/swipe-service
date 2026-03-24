@@ -125,4 +125,19 @@ export class ProfileRepository {
     );
     return Promise.all(creates);
   }
+
+  // ----- Search Preferences -----
+  async getSearchPreferences(userId: string) {
+    return prisma.userSearchPreference.findUnique({
+      where: { user_id: userId },
+    });
+  }
+
+  async upsertSearchPreferences(userId: string, data: any) {
+    return prisma.userSearchPreference.upsert({
+      where: { user_id: userId },
+      update: data,
+      create: { ...data, user_id: userId },
+    });
+  }
 }

@@ -29,6 +29,10 @@ router.put('/habits', authMiddleware, c.setHabits);
 router.get('/looking-for', authMiddleware, c.getLookingForHabits);
 router.put('/looking-for', authMiddleware, c.setLookingForHabits);
 
+// Search preferences (all require auth)
+router.get('/search-preferences', authMiddleware, c.getSearchPreferences);
+router.put('/search-preferences', authMiddleware, c.updateSearchPreferences);
+
 // Public profile by ID — must be LAST to avoid swallowing named routes above
 router.get('/:id', c.getProfileById);
 

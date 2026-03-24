@@ -259,6 +259,7 @@ model Flat {
   latitude          Decimal?  @db.Decimal(10, 7)
   longitude         Decimal?  @db.Decimal(10, 7)
   furnishing_type   String?   @db.VarChar(30)
+  flat_type         String?   @db.VarChar(30)
   description       String?
   is_published      Boolean?  @default(false)
   status            String?   @default("active") @db.VarChar(20)
@@ -279,6 +280,7 @@ model Flat {
 model Room {
   id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   flat_id           String    @db.Uuid
+  room_name         String?   @db.VarChar(255)
   room_type         String    @db.VarChar(20)
   rent              Decimal?  @db.Decimal(10, 2)
   security_deposit  Decimal?  @db.Decimal(10, 2)

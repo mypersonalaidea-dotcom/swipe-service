@@ -44,6 +44,7 @@ export class ProfileService {
       state: data.state,
       search_type: data.search_type,
       is_published: data.is_published,
+      profile_picture_url: data.profile_picture_url,
     };
     Object.keys(safeData).forEach(key => safeData[key] === undefined && delete safeData[key]);
     const updated = await profileRepo.updateProfile(id, safeData);
@@ -101,5 +102,28 @@ export class ProfileService {
 
   async setLookingForHabits(userId: string, habitIds: string[]) {
     return profileRepo.setLookingForHabits(userId, habitIds);
+  }
+
+  // ----- Search Preferences -----
+  async getSearchPreferences(userId: string) {
+    return profileRepo.getSearchPreferences(userId);
+  }
+
+  async updateSearchPreferences(userId: string, data: any) {
+    const SEARCH_PREF_FIELDS = [
+      'location_search', 'location_range_km',
+      'price_min', 'price_max',
+      'flat_types', 'furnishing_types', 'room_types',
+      'available_from', 'brokerage_pref', 'security_deposit_max',
+      'flatmate_age_min', 'flatmate_age_max', 'flatmate_move_in_date',
+      'flat_filter_enabled', 'flatmate_filter_enabled', 'profile_filter_enabled',
+    ] as const;
+
+    const safeData: Record<string, any> = {};
+    for (const key of SEARCH_PREF_FIELDS) {
+      if (data[key] !== undefined) safeData[key] = data[key];
+    }
+
+    return profileRepo.upsertSearchPreferences(userId, safeData);
   }
 }

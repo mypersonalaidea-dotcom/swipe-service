@@ -7,7 +7,7 @@ const flatsRepo = new FlatsRepository();
 const FLAT_ALLOWED_FIELDS = [
   'address', 'city', 'state', 'pincode',
   'latitude', 'longitude',
-  'furnishing_type', 'description', 'is_published',
+  'furnishing_type', 'flat_type', 'description', 'is_published',
   'user_id', // injected server-side, not from body
 ] as const;
 
@@ -33,8 +33,6 @@ export class FlatsService {
     }
 
     // Coerce lat/lng to Number for Prisma's Decimal column.
-    // If the frontend sends them as strings or they are invalid, drop them
-    // so the row is saved without coordinates rather than with bogus values.
     if (safeData.latitude !== undefined) {
       const lat = Number(safeData.latitude);
       if (!isFinite(lat)) delete safeData.latitude;
@@ -44,6 +42,14 @@ export class FlatsService {
       const lng = Number(safeData.longitude);
       if (!isFinite(lng)) delete safeData.longitude;
       else safeData.longitude = lng;
+    }
+
+    // If rooms are provided, use the nested creation path
+    const rooms = data.rooms as any[] | undefined;
+    const commonAmenities = data.common_amenities as string[] | undefined;
+
+    if (rooms && rooms.length > 0) {
+      return await flatsRepo.createFlatWithRooms(safeData, rooms, commonAmenities);
     }
 
     return await flatsRepo.createFlat(safeData);

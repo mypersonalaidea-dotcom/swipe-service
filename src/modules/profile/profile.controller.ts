@@ -177,4 +177,27 @@ export class ProfileController {
       res.status(400).json({ success: false, message: error.message });
     }
   }
+
+  // ====== Search Preferences ======
+  async getSearchPreferences(req: Request, res: Response) {
+    try {
+      const userId = getUserId(req);
+      if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
+      const data = await profileService.getSearchPreferences(userId);
+      res.status(200).json({ success: true, data });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async updateSearchPreferences(req: Request, res: Response) {
+    try {
+      const userId = getUserId(req);
+      if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
+      const data = await profileService.updateSearchPreferences(userId, req.body);
+      res.status(200).json({ success: true, data });
+    } catch (error: any) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
 }
