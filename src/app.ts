@@ -11,6 +11,7 @@ import messagingRoutes from './modules/messaging/messaging.routes';
 import socialRoutes from './modules/social/social.routes';
 import masterRoutes from './modules/master/master.routes';
 import adminRoutes from './modules/admin/admin.routes';
+import searchPreferenceRoutes from './modules/search-preference/search-preference.routes';
 import { errorHandler } from './middleware/error.middleware';
 import { env } from './config/env';
 
@@ -84,6 +85,7 @@ app.use('/api/v1/messages', messagingRoutes);
 app.use('/api/v1/social', socialRoutes);
 app.use('/api/v1/master', masterRoutes);
 app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/search-preference', searchPreferenceRoutes);
 
 // ─── 404 Handler ──────────────────────────────────────────────────────────
 app.use((_req: Request, res: Response) => {

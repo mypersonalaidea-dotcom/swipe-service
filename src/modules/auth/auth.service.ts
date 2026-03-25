@@ -29,6 +29,12 @@ export class AuthService {
       gender: data.gender,
       phone: data.phone,
       ...(data.email && { email: data.email }),
+      ...(data.profile_picture_url && { profile_picture_url: data.profile_picture_url }),
+      ...(data.city && { city: data.city }),
+      ...(data.state && { state: data.state }),
+      ...(data.search_type && { search_type: data.search_type }),
+      ...(data.phone_verified !== undefined && { phone_verified: data.phone_verified }),
+      ...(data.email_verified !== undefined && { email_verified: data.email_verified }),
       password_hash
     });
 

@@ -45,6 +45,7 @@ export class ProfileService {
       search_type: data.search_type,
       is_published: data.is_published,
       profile_picture_url: data.profile_picture_url,
+      email: data.email,
     };
     Object.keys(safeData).forEach(key => safeData[key] === undefined && delete safeData[key]);
     const updated = await profileRepo.updateProfile(id, safeData);
