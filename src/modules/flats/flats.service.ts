@@ -47,9 +47,14 @@ export class FlatsService {
     // If rooms are provided, use the nested creation path
     const rooms = data.rooms as any[] | undefined;
     const commonAmenities = data.common_amenities as string[] | undefined;
+    const media = data.media as any[] | undefined;
 
     if (rooms && rooms.length > 0) {
-      return await flatsRepo.createFlatWithRooms(safeData, rooms, commonAmenities);
+      return await flatsRepo.createFlatWithRooms(safeData, rooms, commonAmenities, media);
+    }
+
+    if (media && media.length > 0) {
+      return await flatsRepo.createFlatWithMedia(safeData, media);
     }
 
     return await flatsRepo.createFlat(safeData);

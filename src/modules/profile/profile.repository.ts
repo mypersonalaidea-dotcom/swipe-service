@@ -16,11 +16,11 @@ export class ProfileRepository {
               where: { status: 'active' },
               include: {
                 room_amenities: { include: { amenity: true } },
-                media: true
+                media: { where: { status: 'active' } }
               }
             },
             common_amenities: { include: { amenity: true } },
-            media: true
+            media: { where: { status: 'active' } }
           }
         }
       }

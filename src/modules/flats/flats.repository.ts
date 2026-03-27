@@ -45,16 +45,28 @@ export class FlatsRepository {
       available_from?: string;
       display_order?: number;
       amenities?: string[]; // amenity names
+      media?: any[]; // URLs
     }>,
     commonAmenities?: string[], // amenity names
+    flatMedia?: any[], // URLs
   ) {
     return prisma.$transaction(async (tx) => {
       // 1. Create the flat
       const flat = await tx.flat.create({ data: flatData });
 
+      if (flatMedia && flatMedia.length > 0) {
+        await tx.flatMedia.createMany({
+          data: flatMedia.map((m: any, i: number) => ({
+            flat_id: flat.id,
+            media_url: typeof m === 'string' ? m : m.url || m.media_url,
+            display_order: i
+          }))
+        });
+      }
+
       // 2. Create rooms with amenities
       for (const room of rooms) {
-        const { amenities: amenityNames, ...roomFields } = room;
+        const { amenities: amenityNames, media: roomMedia, ...roomFields } = room;
 
         // Coerce numeric fields
         const roomData: any = {
@@ -71,6 +83,16 @@ export class FlatsRepository {
         if (roomFields.available_from) roomData.available_from = new Date(roomFields.available_from);
 
         const createdRoom = await tx.room.create({ data: roomData });
+
+        if (roomMedia && roomMedia.length > 0) {
+          await tx.roomMedia.createMany({
+            data: roomMedia.map((m: any, i: number) => ({
+              room_id: createdRoom.id,
+              media_url: typeof m === 'string' ? m : m.url || m.media_url,
+              display_order: i
+            }))
+          });
+        }
 
         // Link room amenities by name
         if (amenityNames && amenityNames.length > 0) {
@@ -111,9 +133,32 @@ export class FlatsRepository {
       return tx.flat.findUnique({
         where: { id: flat.id },
         include: {
-          rooms: { include: { room_amenities: { include: { amenity: true } } } },
+          rooms: { include: { room_amenities: { include: { amenity: true } }, media: true } },
           common_amenities: { include: { amenity: true } },
+          media: true,
         },
+      });
+    });
+  }
+
+  async createFlatWithMedia(flatData: any, flatMedia: any[]) {
+    return prisma.$transaction(async (tx) => {
+      const flat = await tx.flat.create({ data: flatData });
+      if (flatMedia && flatMedia.length > 0) {
+        await tx.flatMedia.createMany({
+          data: flatMedia.map((m: any, i: number) => ({
+            flat_id: flat.id,
+            media_url: typeof m === 'string' ? m : m.url || m.media_url,
+            display_order: i
+          }))
+        });
+      }
+      return tx.flat.findUnique({
+        where: { id: flat.id },
+        include: {
+          media: true,
+          user: { select: { id: true, name: true, profile_picture_url: true } }
+        }
       });
     });
   }
