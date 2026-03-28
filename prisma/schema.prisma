@@ -72,6 +72,7 @@ model MasterDegree {
   other_names           String[]
   submitted_by          String?   @db.Uuid
   status                String?   @default("active") @db.VarChar(20)
+  is_verified           Boolean   @default(false)
   created_at            DateTime? @default(now()) @db.Timestamptz()
   updated_at            DateTime? @default(now()) @db.Timestamptz()
 
@@ -88,6 +89,7 @@ model MasterPosition {
   other_names     String[]
   submitted_by    String?   @db.Uuid
   status          String?   @default("active") @db.VarChar(20)
+  is_verified     Boolean   @default(false)
   created_at      DateTime? @default(now()) @db.Timestamptz()
   updated_at      DateTime? @default(now()) @db.Timestamptz()
 
@@ -105,6 +107,7 @@ model MasterCompany {
   website         String?
   submitted_by    String?   @db.Uuid
   status          String?   @default("active") @db.VarChar(20)
+  is_verified     Boolean   @default(false)
   created_at      DateTime? @default(now()) @db.Timestamptz()
   updated_at      DateTime? @default(now()) @db.Timestamptz()
 
@@ -124,6 +127,7 @@ model MasterInstitution {
   state                 String?   @db.VarChar(100)
   submitted_by          String?   @db.Uuid
   status                String?   @default("active") @db.VarChar(20)
+  is_verified           Boolean   @default(false)
   created_at            DateTime? @default(now()) @db.Timestamptz()
   updated_at            DateTime? @default(now()) @db.Timestamptz()
 

@@ -26,4 +26,20 @@ export class MasterService {
   async getAmenities() {
     return await masterRepo.getAmenities();
   }
+
+  async createDegree(data: any) {
+    return await masterRepo.createDegree(data);
+  }
+
+  async createPosition(data: any) {
+    return await masterRepo.createPosition(data);
+  }
+
+  async createCompany(data: any) {
+    return await masterRepo.createCompany(data);
+  }
+
+  async createInstitution(data: any) {
+    return await masterRepo.createInstitution(data);
+  }
 }

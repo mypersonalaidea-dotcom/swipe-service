@@ -30,4 +30,44 @@ export class MasterRepository {
       orderBy: { display_order: 'asc' },
     });
   }
+
+  async createDegree(data: { full_name: string; common_name: string; other_names: string[]; submitted_by?: string }) {
+    return prisma.masterDegree.create({
+      data: {
+        ...data,
+        is_verified: false,
+        status: 'active',
+      },
+    });
+  }
+
+  async createPosition(data: { full_name: string; common_name: string; other_names: string[]; submitted_by?: string }) {
+    return prisma.masterPosition.create({
+      data: {
+        ...data,
+        is_verified: false,
+        status: 'active',
+      },
+    });
+  }
+
+  async createCompany(data: { name: string; logo_url?: string; aliases: string[]; submitted_by?: string }) {
+    return prisma.masterCompany.create({
+      data: {
+        ...data,
+        is_verified: false,
+        status: 'active',
+      },
+    });
+  }
+
+  async createInstitution(data: { name: string; logo_url?: string; aliases: string[]; submitted_by?: string }) {
+    return prisma.masterInstitution.create({
+      data: {
+        ...data,
+        is_verified: false,
+        status: 'active',
+      },
+    });
+  }
 }

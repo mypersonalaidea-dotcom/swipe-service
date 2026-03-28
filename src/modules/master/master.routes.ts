@@ -14,4 +14,10 @@ router.get('/institutions', authMiddleware, masterController.getInstitutions);
 router.get('/habits', authMiddleware, masterController.getHabits);
 router.get('/amenities', authMiddleware, masterController.getAmenities);
 
+// Creation endpoints (require auth)
+router.post('/degrees', authMiddleware, masterController.createDegree);
+router.post('/positions', authMiddleware, masterController.createPosition);
+router.post('/companies', authMiddleware, masterController.createCompany);
+router.post('/institutions', authMiddleware, masterController.createInstitution);
+
 export default router;
