@@ -497,18 +497,25 @@ model UserSearchPreference {
   user_id                  String    @unique @db.Uuid
   flat_filter_enabled      Boolean?  @default(true)
   location_search          String?
-  location_range_km        Int?      @default(5)
-  price_min                Decimal?  @default(0) @db.Decimal(10, 2)
-  price_max                Decimal?  @default(100000) @db.Decimal(10, 2)
+  latitude                 Decimal?  @db.Decimal(10, 7)
+  longitude                Decimal?  @db.Decimal(10, 7)
+  radius_km                Int?      @default(5)
+  min_rent                 Decimal?  @default(0) @db.Decimal(10, 2)
+  max_rent                 Decimal?  @default(100000) @db.Decimal(10, 2)
   flat_types               String[]
   furnishing_types         String[]
   room_types               String[]
   available_from           DateTime? @db.Date
-  brokerage_pref           String?   @db.VarChar(20)
-  security_deposit_max     Decimal?  @db.Decimal(10, 2)
+  brokerage                String?   @db.VarChar(20)
+  security_deposit         String?   @db.VarChar(50)
+  room_amenities           String[]
+  common_amenities         String[]
+  age_min                  Int?      @default(18)
+  age_max                  Int?      @default(60)
+  companies                String[]
+  schools                  String[]
+  habits                   String[]
   flatmate_filter_enabled  Boolean?  @default(true)
-  flatmate_age_min         Int?      @default(18)
-  flatmate_age_max         Int?      @default(60)
   flatmate_move_in_date    DateTime? @db.Date
   profile_filter_enabled   Boolean?  @default(false)
   status                   String?   @default("active") @db.VarChar(20)

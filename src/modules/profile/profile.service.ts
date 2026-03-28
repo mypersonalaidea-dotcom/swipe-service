@@ -111,19 +111,36 @@ export class ProfileService {
   }
 
   async updateSearchPreferences(userId: string, data: any) {
-    const SEARCH_PREF_FIELDS = [
-      'location_search', 'location_range_km',
-      'price_min', 'price_max',
+    const ARRAY_FIELDS = [
       'flat_types', 'furnishing_types', 'room_types',
-      'available_from', 'brokerage_pref', 'security_deposit_max',
-      'flatmate_age_min', 'flatmate_age_max', 'flatmate_move_in_date',
-      'flat_filter_enabled', 'flatmate_filter_enabled', 'profile_filter_enabled',
+      'room_amenities', 'common_amenities', 'companies', 'schools', 'habits'
     ] as const;
 
+    const NUMERIC_FIELDS = [
+      'latitude', 'longitude', 'radius_km', 'min_rent', 'max_rent', 'age_min', 'age_max'
+    ] as const;
+
+    const DATE_FIELDS = ['available_from', 'flatmate_move_in_date'] as const;
+
+    const STRING_FIELDS = ['location_search', 'brokerage', 'security_deposit'] as const;
+
+    const BOOLEAN_FIELDS = ['flat_filter_enabled', 'flatmate_filter_enabled', 'profile_filter_enabled'] as const;
+
     const safeData: Record<string, any> = {};
-    for (const key of SEARCH_PREF_FIELDS) {
-      if (data[key] !== undefined) safeData[key] = data[key];
-    }
+
+    // Helper: split "a,b,c" -> ["a", "b", "c"]
+    const toArray = (v: any) => {
+      if (!v) return [];
+      if (Array.isArray(v)) return v;
+      if (typeof v === 'string') return v.split(',').map(s => s.trim()).filter(Boolean);
+      return [];
+    };
+
+    ARRAY_FIELDS.forEach(f => { if (data[f] !== undefined) safeData[f] = toArray(data[f]); });
+    NUMERIC_FIELDS.forEach(f => { if (data[f] !== undefined) safeData[f] = data[f] === null ? null : Number(data[f]); });
+    DATE_FIELDS.forEach(f => { if (data[f] !== undefined) safeData[f] = data[f] ? new Date(data[f]) : null; });
+    STRING_FIELDS.forEach(f => { if (data[f] !== undefined) safeData[f] = data[f]; });
+    BOOLEAN_FIELDS.forEach(f => { if (data[f] !== undefined) safeData[f] = !!data[f]; });
 
     return profileRepo.upsertSearchPreferences(userId, safeData);
   }

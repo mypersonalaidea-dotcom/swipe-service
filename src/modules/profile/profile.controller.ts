@@ -193,11 +193,15 @@ export class ProfileController {
   async updateSearchPreferences(req: Request, res: Response) {
     try {
       const userId = getUserId(req);
-      if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
+      if (!userId) return res.status(401).json({ status: 'error', message: 'Unauthorized' });
       const data = await profileService.updateSearchPreferences(userId, req.body);
-      res.status(200).json({ success: true, data });
+      res.status(200).json({
+        status: 'success',
+        message: 'Search preferences updated successfully',
+        data
+      });
     } catch (error: any) {
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ status: 'error', message: error.message });
     }
   }
 }

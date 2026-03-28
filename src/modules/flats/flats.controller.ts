@@ -6,10 +6,10 @@ const flatsService = new FlatsService();
 export class FlatsController {
   async getFlats(req: Request, res: Response) {
     try {
-      const data = await flatsService.getFlats();
-      res.status(200).json({ success: true, data });
+      const data = await flatsService.getFlats(req.query);
+      res.status(200).json({ status: 'success', data });
     } catch (error: any) {
-      res.status(500).json({ success: false, message: error.message });
+      res.status(500).json({ status: 'error', message: error.message });
     }
   }
 

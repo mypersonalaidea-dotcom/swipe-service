@@ -12,8 +12,8 @@ const FLAT_ALLOWED_FIELDS = [
 ] as const;
 
 export class FlatsService {
-  async getFlats() {
-    return await flatsRepo.getFlats();
+  async getFlats(query: any) {
+    return await flatsRepo.getFlats(query);
   }
 
   async getFlatById(id: string) {
