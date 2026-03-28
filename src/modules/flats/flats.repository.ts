@@ -176,7 +176,17 @@ export class FlatsRepository {
         rooms: { include: { room_amenities: { include: { amenity: true } }, media: true } },
         common_amenities: { include: { amenity: true } },
         media: true,
-        user: { select: { id: true, name: true, age: true, profile_picture_url: true } }
+        user: { 
+          select: { 
+            id: true, 
+            name: true, 
+            age: true, 
+            profile_picture_url: true,
+            user_habits: { include: { habit: true } },
+            job_experiences: { include: { company: true, position: true } },
+            education_experiences: { include: { institution: true, degree: true } }
+          } 
+        }
       }
     });
   }
@@ -256,7 +266,11 @@ export class FlatsRepository {
         // Link room amenities by name (Case-insensitive)
         if (amenityNames.length > 0) {
           const masterAmenities = await tx.masterAmenity.findMany({
-            where: { name: { in: amenityNames, mode: 'insensitive' }, status: 'active' },
+            where: {
+              OR: [
+                { name: { in: amenityNames, mode: 'insensitive' } },
+              ]
+            }
           });
 
           if (masterAmenities.length > 0) {
@@ -275,7 +289,11 @@ export class FlatsRepository {
       if (commonAmenities && commonAmenities.length > 0) {
         const cleanNames = commonAmenities.map(s => String(s).trim()).filter(Boolean);
         const masterAmenities = await tx.masterAmenity.findMany({
-          where: { name: { in: cleanNames, mode: 'insensitive' }, status: 'active' },
+          where: {
+            OR: [
+              { name: { in: cleanNames, mode: 'insensitive' } },
+            ]
+          }
         });
 
         if (masterAmenities.length > 0) {
@@ -296,7 +314,17 @@ export class FlatsRepository {
           rooms: { include: { room_amenities: { include: { amenity: true } }, media: true } },
           common_amenities: { include: { amenity: true } },
           media: true,
-          user: { select: { id: true, name: true, age: true, profile_picture_url: true } }
+          user: { 
+            select: { 
+              id: true, 
+              name: true, 
+              age: true, 
+              profile_picture_url: true,
+              user_habits: { include: { habit: true } },
+              job_experiences: { include: { company: true, position: true } },
+              education_experiences: { include: { institution: true, degree: true } }
+            } 
+          }
         },
       });
     });
@@ -318,7 +346,17 @@ export class FlatsRepository {
         where: { id: flat.id },
         include: {
           media: true,
-          user: { select: { id: true, name: true, age: true, profile_picture_url: true } }
+          user: { 
+            select: { 
+              id: true, 
+              name: true, 
+              age: true, 
+              profile_picture_url: true,
+              user_habits: { include: { habit: true } },
+              job_experiences: { include: { company: true, position: true } },
+              education_experiences: { include: { institution: true, degree: true } }
+            } 
+          }
         }
       });
     });
