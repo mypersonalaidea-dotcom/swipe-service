@@ -1,4 +1,5 @@
 import { FlatsRepository } from './flats.repository';
+import { FlatFormatter } from '../../utils/flat-formatter';
 
 const flatsRepo = new FlatsRepository();
 
@@ -12,36 +13,14 @@ const FLAT_ALLOWED_FIELDS = [
 ] as const;
 
 export class FlatsService {
-  private formatDate(date: any): string | null {
-    if (!date) return null;
-    const d = new Date(date);
-    if (isNaN(d.getTime())) return null;
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = months[d.getMonth()];
-    const year = d.getFullYear();
-    return `${day} ${month} ${year}`;
-  }
-
-  private formatFlat(flat: any) {
-    if (!flat) return flat;
-    if (flat.rooms && Array.isArray(flat.rooms)) {
-      flat.rooms = flat.rooms.map((r: any) => ({
-        ...r,
-        available_from: this.formatDate(r.available_from)
-      }));
-    }
-    return flat;
-  }
-
   async getFlats(query: any) {
     const flats = await flatsRepo.getFlats(query);
-    return flats.map((f: any) => this.formatFlat(f));
+    return flats.map((f: any) => FlatFormatter.formatFlat(f));
   }
 
   async getFlatById(id: string) {
     const flat = await flatsRepo.getFlatById(id);
-    return this.formatFlat(flat);
+    return FlatFormatter.formatFlat(flat);
   }
 
   async createFlat(data: any) {
@@ -75,15 +54,15 @@ export class FlatsService {
 
     if (rooms && rooms.length > 0) {
       const flat = await flatsRepo.createFlatWithRooms(safeData, rooms, commonAmenities, media);
-      return this.formatFlat(flat);
+      return FlatFormatter.formatFlat(flat);
     }
 
     if (media && media.length > 0) {
       const flat = await flatsRepo.createFlatWithMedia(safeData, media);
-      return this.formatFlat(flat);
+      return FlatFormatter.formatFlat(flat);
     }
 
     const flat = await flatsRepo.createFlat(safeData);
-    return this.formatFlat(flat);
+    return FlatFormatter.formatFlat(flat);
   }
 }
