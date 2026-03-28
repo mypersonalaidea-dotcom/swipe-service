@@ -5,19 +5,20 @@ import { authMiddleware } from '../../middleware/auth.middleware';
 const router = Router();
 const masterController = new MasterController();
 
-// All master lookup endpoints require authentication —
-// prevents anonymous browsers from enumerating the data.
-router.get('/degrees', authMiddleware, masterController.getDegrees);
-router.get('/positions', authMiddleware, masterController.getPositions);
-router.get('/companies', authMiddleware, masterController.getCompanies);
-router.get('/institutions', authMiddleware, masterController.getInstitutions);
+// Specific master lookup endpoints are public to support the onboarding/signup flow.
+router.get('/degrees', masterController.getDegrees);
+router.get('/positions', masterController.getPositions);
+router.get('/companies', masterController.getCompanies);
+router.get('/institutions', masterController.getInstitutions);
+
+// These lookup endpoints still require authentication.
 router.get('/habits', authMiddleware, masterController.getHabits);
 router.get('/amenities', authMiddleware, masterController.getAmenities);
 
-// Creation endpoints (require auth)
-router.post('/degrees', authMiddleware, masterController.createDegree);
-router.post('/positions', authMiddleware, masterController.createPosition);
-router.post('/companies', authMiddleware, masterController.createCompany);
-router.post('/institutions', authMiddleware, masterController.createInstitution);
+// Creation endpoints for entities used during onboarding are now public.
+router.post('/degrees', masterController.createDegree);
+router.post('/positions', masterController.createPosition);
+router.post('/companies', masterController.createCompany);
+router.post('/institutions', masterController.createInstitution);
 
 export default router;
