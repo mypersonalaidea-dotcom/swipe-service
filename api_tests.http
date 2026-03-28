@@ -409,6 +409,18 @@ Authorization: Bearer {{token}}
 
 ###
 
+### 11.1b Toggle save a profile
+# Replace the targetUserId with a real user uuid
+POST {{baseUrl}}/social/save-profile
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "targetUserId": "REPLACE_WITH_REAL_UUID"
+}
+
+###
+
 ### 11.2 Report a user
 POST {{baseUrl}}/social/reports
 Authorization: Bearer {{token}}
