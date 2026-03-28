@@ -12,12 +12,36 @@ const FLAT_ALLOWED_FIELDS = [
 ] as const;
 
 export class FlatsService {
+  private formatDate(date: any): string | null {
+    if (!date) return null;
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return null;
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = months[d.getMonth()];
+    const year = d.getFullYear();
+    return `${day} ${month} ${year}`;
+  }
+
+  private formatFlat(flat: any) {
+    if (!flat) return flat;
+    if (flat.rooms && Array.isArray(flat.rooms)) {
+      flat.rooms = flat.rooms.map((r: any) => ({
+        ...r,
+        available_from: this.formatDate(r.available_from)
+      }));
+    }
+    return flat;
+  }
+
   async getFlats(query: any) {
-    return await flatsRepo.getFlats(query);
+    const flats = await flatsRepo.getFlats(query);
+    return flats.map((f: any) => this.formatFlat(f));
   }
 
   async getFlatById(id: string) {
-    return await flatsRepo.getFlatById(id);
+    const flat = await flatsRepo.getFlatById(id);
+    return this.formatFlat(flat);
   }
 
   async createFlat(data: any) {
@@ -50,13 +74,16 @@ export class FlatsService {
     const media = data.media as any[] | undefined;
 
     if (rooms && rooms.length > 0) {
-      return await flatsRepo.createFlatWithRooms(safeData, rooms, commonAmenities, media);
+      const flat = await flatsRepo.createFlatWithRooms(safeData, rooms, commonAmenities, media);
+      return this.formatFlat(flat);
     }
 
     if (media && media.length > 0) {
-      return await flatsRepo.createFlatWithMedia(safeData, media);
+      const flat = await flatsRepo.createFlatWithMedia(safeData, media);
+      return this.formatFlat(flat);
     }
 
-    return await flatsRepo.createFlat(safeData);
+    const flat = await flatsRepo.createFlat(safeData);
+    return this.formatFlat(flat);
   }
 }
