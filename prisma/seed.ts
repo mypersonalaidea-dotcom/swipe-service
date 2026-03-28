@@ -54,6 +54,7 @@ async function main() {
     skipDuplicates: true,
     data: [
       { name: 'Air Conditioning', amenity_type: 'room', icon_name: 'ac', display_order: 1 },
+      { name: 'AC', amenity_type: 'room', icon_name: 'ac', display_order: 1 },
       { name: 'Attached Bathroom', amenity_type: 'room', icon_name: 'bath', display_order: 2 },
       { name: 'Wardrobe', amenity_type: 'room', icon_name: 'wardrobe', display_order: 3 },
       { name: 'Study Table', amenity_type: 'room', icon_name: 'desk', display_order: 4 },
@@ -61,6 +62,7 @@ async function main() {
       { name: 'Bed', amenity_type: 'room', icon_name: 'bed', display_order: 6 },
       { name: 'WiFi', amenity_type: 'flat', icon_name: 'wifi', display_order: 10 },
       { name: 'Power Backup', amenity_type: 'flat', icon_name: 'lightning', display_order: 11 },
+      { name: 'Kitchen', amenity_type: 'flat', icon_name: 'kitchen', display_order: 11.5 },
       { name: 'CCTV', amenity_type: 'flat', icon_name: 'camera', display_order: 12 },
       { name: 'Security Guard', amenity_type: 'flat', icon_name: 'shield', display_order: 13 },
       { name: 'Lift', amenity_type: 'flat', icon_name: 'elevator', display_order: 14 },

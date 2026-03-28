@@ -222,7 +222,7 @@ export class FlatsRepository {
 
       // 2. Create rooms with amenities
       for (const room of rooms) {
-        const { amenities: amenityNames, media: roomMedia, ...roomFields } = room;
+        const { room_amenities: amenityNames, media: roomMedia, ...roomFields } = room as any;
 
         // Coerce numeric fields
         const roomData: any = {
