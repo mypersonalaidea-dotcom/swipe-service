@@ -1,5 +1,6 @@
 import { ProfileRepository } from './profile.repository';
 import { FlatFormatter } from '../../utils/flat-formatter';
+import { UserFormatter } from '../../utils/user-formatter';
 
 const profileRepo = new ProfileRepository();
 
@@ -32,12 +33,15 @@ export class ProfileService {
   async getProfile(id: string) {
     const profile = await profileRepo.findById(id);
     if (!profile) throw new Error('Profile not found');
-    const { password_hash: _, ...safeProfile } = profile as any;
+    let { password_hash: _, ...safeProfile } = profile as any;
     
     // Format flats if present
     if (safeProfile.flats && Array.isArray(safeProfile.flats)) {
       safeProfile.flats = safeProfile.flats.map((f: any) => FlatFormatter.formatFlat(f));
     }
+    
+    // Format the profile (user) itself
+    safeProfile = UserFormatter.formatUser(safeProfile);
     
     return safeProfile;
   }
@@ -56,12 +60,15 @@ export class ProfileService {
     };
     Object.keys(safeData).forEach(key => safeData[key] === undefined && delete safeData[key]);
     const updated = await profileRepo.updateProfile(id, safeData);
-    const { password_hash: _, ...safeProfile } = updated as any;
+    let { password_hash: _, ...safeProfile } = updated as any;
 
     // Format flats if present
     if (safeProfile.flats && Array.isArray(safeProfile.flats)) {
       safeProfile.flats = safeProfile.flats.map((f: any) => FlatFormatter.formatFlat(f));
     }
+
+    // Format the profile (user) itself
+    safeProfile = UserFormatter.formatUser(safeProfile);
 
     return safeProfile;
   }

@@ -1,3 +1,5 @@
+import { UserFormatter } from './user-formatter';
+
 export class FlatFormatter {
   static formatDate(date: any): string | null {
     if (!date) return null;
@@ -37,6 +39,12 @@ export class FlatFormatter {
         return room;
       });
     }
+
+    // Format user if present
+    if (flat.user) {
+      flat.user = UserFormatter.formatUser(flat.user);
+    }
+
     return flat;
   }
 }
