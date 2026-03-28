@@ -4,9 +4,12 @@ import { generateToken } from '../../utils/jwt';
 import { OtpService } from './otp.service';
 import { EmailOtpService } from './email-otp.service';
 
+import { FlatsService } from '../flats/flats.service';
+
 const authRepo = new AuthRepository();
 const otpService = new OtpService();
 const emailOtpService = new EmailOtpService();
+const flatsService = new FlatsService();
 
 export class AuthService {
   async signup(data: any) {
@@ -37,6 +40,20 @@ export class AuthService {
       ...(data.email_verified !== undefined && { email_verified: data.email_verified }),
       password_hash
     });
+
+    // If flat details are provided during signup (onboarding flow), create the flat.
+    if (data.flat_details) {
+      try {
+        await flatsService.createFlat({
+          ...data.flat_details,
+          user_id: user.id
+        });
+      } catch (err) {
+        console.error('[AUTH] Failed to create flat during signup:', err);
+        // We don't fail the whole signup if flat creation fails, but maybe we should?
+        // For now, just log it.
+      }
+    }
 
     const token = generateToken({ id: user.id });
     const { password_hash: _, ...userWithoutPassword } = user as any;

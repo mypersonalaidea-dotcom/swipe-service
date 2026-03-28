@@ -222,7 +222,10 @@ export class FlatsRepository {
 
       // 2. Create rooms with amenities
       for (const room of rooms) {
-        const { room_amenities: amenityNames, media: roomMedia, ...roomFields } = room as any;
+        const { room_amenities: roomAmenityInput, media: roomMedia, ...roomFields } = room as any;
+        const amenityNames = Array.isArray(roomAmenityInput) 
+          ? roomAmenityInput.map(s => String(s).trim()).filter(Boolean) 
+          : [];
 
         // Coerce numeric fields
         const roomData: any = {
@@ -250,10 +253,10 @@ export class FlatsRepository {
           });
         }
 
-        // Link room amenities by name
-        if (amenityNames && amenityNames.length > 0) {
+        // Link room amenities by name (Case-insensitive)
+        if (amenityNames.length > 0) {
           const masterAmenities = await tx.masterAmenity.findMany({
-            where: { name: { in: amenityNames }, status: 'active' },
+            where: { name: { in: amenityNames, mode: 'insensitive' }, status: 'active' },
           });
 
           if (masterAmenities.length > 0) {
@@ -268,10 +271,11 @@ export class FlatsRepository {
         }
       }
 
-      // 3. Link common amenities by name
+      // 3. Link common amenities by name (Case-insensitive)
       if (commonAmenities && commonAmenities.length > 0) {
+        const cleanNames = commonAmenities.map(s => String(s).trim()).filter(Boolean);
         const masterAmenities = await tx.masterAmenity.findMany({
-          where: { name: { in: commonAmenities }, status: 'active' },
+          where: { name: { in: cleanNames, mode: 'insensitive' }, status: 'active' },
         });
 
         if (masterAmenities.length > 0) {
