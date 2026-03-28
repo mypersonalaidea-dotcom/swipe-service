@@ -8,7 +8,7 @@ export class FlatsRepository {
         rooms: { include: { room_amenities: { include: { amenity: true } }, media: true } },
         common_amenities: { include: { amenity: true } },
         media: true,
-        user: { select: { id: true, name: true, profile_picture_url: true } }
+        user: { select: { id: true, name: true, age: true, profile_picture_url: true } }
       }
     });
   }
@@ -20,7 +20,7 @@ export class FlatsRepository {
         rooms: { include: { room_amenities: { include: { amenity: true } }, media: true } },
         common_amenities: { include: { amenity: true } },
         media: true,
-        user: { select: { id: true, name: true, profile_picture_url: true } }
+        user: { select: { id: true, name: true, age: true, profile_picture_url: true } }
       }
     });
   }
@@ -136,6 +136,7 @@ export class FlatsRepository {
           rooms: { include: { room_amenities: { include: { amenity: true } }, media: true } },
           common_amenities: { include: { amenity: true } },
           media: true,
+          user: { select: { id: true, name: true, age: true, profile_picture_url: true } }
         },
       });
     });
@@ -157,7 +158,7 @@ export class FlatsRepository {
         where: { id: flat.id },
         include: {
           media: true,
-          user: { select: { id: true, name: true, profile_picture_url: true } }
+          user: { select: { id: true, name: true, age: true, profile_picture_url: true } }
         }
       });
     });
