@@ -9,6 +9,13 @@ export class UserFormatter {
         .filter(Boolean);
     }
 
+    // Flatten looking for habits into label arrays
+    if (user.looking_for_habits && Array.isArray(user.looking_for_habits)) {
+      user.looking_for_habits = user.looking_for_habits
+        .map((uh: any) => uh.habit?.label || uh.habit_label)
+        .filter(Boolean);
+    }
+
     // Flatten job experiences into workExperience strings
     if (user.job_experiences && Array.isArray(user.job_experiences)) {
       user.workExperience = user.job_experiences

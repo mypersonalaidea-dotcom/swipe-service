@@ -9,6 +9,7 @@ export class ProfileRepository {
         education_experiences: { include: { institution: true, degree: true } },
         user_habits: { include: { habit: true } },
         looking_for_habits: { include: { habit: true } },
+        search_preferences: true,
         flats: {
           where: { status: 'active' },
           include: {
@@ -20,7 +21,19 @@ export class ProfileRepository {
               }
             },
             common_amenities: { include: { amenity: true } },
-            media: { where: { status: 'active' } }
+            media: { where: { status: 'active' } },
+            user: { 
+              select: { 
+                id: true, 
+                name: true, 
+                age: true, 
+                gender: true,
+                profile_picture_url: true,
+                user_habits: { include: { habit: true } },
+                job_experiences: { include: { company: true, position: true } },
+                education_experiences: { include: { institution: true, degree: true } }
+              } 
+            }
           }
         }
       }
