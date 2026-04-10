@@ -81,6 +81,28 @@ export function setupSocket(server: http.Server) {
     // Broadcast online status to all conversation partners
     await broadcastPresence(io, userId, true);
 
+    // Give the connecting user the online status of all their partners
+    try {
+      const conversationIds = await repo.getUserConversationIds(userId);
+      const partnerIds = new Set<string>();
+      for (const convId of conversationIds) {
+        const otherIds = await repo.getOtherParticipantIds(convId, userId);
+        for (const partnerId of otherIds) partnerIds.add(partnerId);
+      }
+      
+      for (const partnerId of partnerIds) {
+        if (isUserOnline(partnerId)) {
+          socket.emit('user_online', {
+            user_id: partnerId,
+            is_online: true,
+            last_seen_at: null
+          });
+        }
+      }
+    } catch (err) {
+      logger.error('[Socket] Failed to push existing presence:', err);
+    }
+
     // ── join_conversation ──────────────────────────────────────────────────────
     socket.on('join_conversation', async ({ conversationId }: { conversationId: string }) => {
       if (!conversationId) return;
@@ -281,9 +303,9 @@ async function broadcastPresence(io: Server, userId: string, isOnline: boolean) 
     const conversationIds = await repo.getUserConversationIds(userId);
 
     const presencePayload = {
-      userId,
-      isOnline,
-      lastSeenAt: isOnline ? null : (user?.last_login_at?.toISOString() ?? null),
+      user_id: userId,
+      is_online: isOnline,
+      last_seen_at: isOnline ? null : (user?.last_login_at?.toISOString() ?? null),
     };
 
     for (const convId of conversationIds) {
