@@ -50,6 +50,8 @@ model User {
   filter_amenities      UserFilterAmenity[]
   filter_companies      UserFilterCompany[]
   filter_institutions   UserFilterInstitution[]
+  visited_profiles      VisitedProfile[]            @relation("UserVisitedProfiles")
+  visited_by_profiles   VisitedProfile[]            @relation("VisitedByProfiles")
 
   master_degrees_submitted      MasterDegree[]        @relation("SubmittedDegrees")
   master_positions_submitted    MasterPosition[]      @relation("SubmittedPositions")
@@ -584,6 +586,20 @@ model UserFilterInstitution {
 
   @@unique([user_id, institution_id])
   @@map("user_filter_institutions")
+}
+
+model VisitedProfile {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id         String    @db.Uuid
+  visited_user_id String    @db.Uuid
+  created_at      DateTime? @default(now()) @db.Timestamptz()
+
+  user            User      @relation("UserVisitedProfiles", fields: [user_id], references: [id], onDelete: Cascade)
+  visited_user    User      @relation("VisitedByProfiles", fields: [visited_user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, visited_user_id])
+  @@index([user_id])
+  @@map("visited_profiles")
 }
 
 model PhoneOtp {
