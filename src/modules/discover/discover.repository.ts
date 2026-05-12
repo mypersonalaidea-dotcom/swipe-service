@@ -48,9 +48,6 @@ export class DiscoverRepository {
       prisma.user.findMany({
         where: {
           id: { notIn: excludeIds },
-          // Only exclude profiles that are explicitly unpublished (false).
-          // Profiles with is_published = true OR null will be included.
-          is_published: { not: false },
           status: 'active',
         },
         include: {
@@ -80,7 +77,6 @@ export class DiscoverRepository {
       prisma.user.count({
         where: {
           id: { notIn: excludeIds },
-          is_published: { not: false },
           status: 'active',
         },
       }),
