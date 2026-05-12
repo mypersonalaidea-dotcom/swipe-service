@@ -15,11 +15,17 @@ export class DiscoverRepository {
     const skip = (page - 1) * limit;
 
     // Get all visited profile IDs for this user
-    const visitedRecords = await prisma.visitedProfile.findMany({
-      where: { user_id: userId },
-      select: { visited_user_id: true },
-    });
-    const visitedIds = visitedRecords.map((v) => v.visited_user_id);
+    // Wrapped in try-catch so the feed still works if the migration hasn't been deployed yet
+    let visitedIds: string[] = [];
+    try {
+      const visitedRecords = await prisma.visitedProfile.findMany({
+        where: { user_id: userId },
+        select: { visited_user_id: true },
+      });
+      visitedIds = visitedRecords.map((v) => v.visited_user_id);
+    } catch (err) {
+      console.error('[DiscoverRepo] Failed to fetch visited profiles (migration may not be applied):', err);
+    }
 
     // Also exclude blocked users (both directions)
     const blocks = await prisma.userBlock.findMany({
@@ -42,7 +48,9 @@ export class DiscoverRepository {
       prisma.user.findMany({
         where: {
           id: { notIn: excludeIds },
-          is_published: true,
+          // Only exclude profiles that are explicitly unpublished (false).
+          // Profiles with is_published = true OR null will be included.
+          is_published: { not: false },
           status: 'active',
         },
         include: {
@@ -72,7 +80,7 @@ export class DiscoverRepository {
       prisma.user.count({
         where: {
           id: { notIn: excludeIds },
-          is_published: true,
+          is_published: { not: false },
           status: 'active',
         },
       }),

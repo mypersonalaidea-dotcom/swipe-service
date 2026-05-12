@@ -21,6 +21,7 @@ export class DiscoverController {
       const data = await discoverService.getFeed(userId, page, limit);
       res.status(200).json({ success: true, data });
     } catch (error: any) {
+      console.error('[DiscoverController] getFeed error:', error);
       res.status(500).json({ success: false, message: error.message });
     }
   }
