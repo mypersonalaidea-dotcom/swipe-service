@@ -57,6 +57,9 @@ export class ProfileService {
       is_published: data.is_published,
       profile_picture_url: data.profile_picture_url,
       email: data.email,
+      phone_verified: data.phone_verified,
+      email_verified: data.email_verified,
+      whatsapp_notifications: data.whatsapp_notifications,
     };
     Object.keys(safeData).forEach(key => safeData[key] === undefined && delete safeData[key]);
     const updated = await profileRepo.updateProfile(id, safeData);

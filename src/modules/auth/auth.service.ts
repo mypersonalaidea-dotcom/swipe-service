@@ -38,6 +38,7 @@ export class AuthService {
       ...(data.search_type && { search_type: data.search_type }),
       ...(data.phone_verified !== undefined && { phone_verified: data.phone_verified }),
       ...(data.email_verified !== undefined && { email_verified: data.email_verified }),
+      ...(data.whatsapp_notifications !== undefined && { whatsapp_notifications: data.whatsapp_notifications }),
       password_hash
     });
 

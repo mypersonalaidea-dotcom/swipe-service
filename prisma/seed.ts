@@ -138,42 +138,64 @@ async function main() {
   console.log(`  ✅ Seeded positions (+${positionsResult.count})`);
 
   // ─── Master Companies ─────────────────────────────────────────────────────
-  // name is NOT @unique — use raw SQL insert with ON CONFLICT DO NOTHING
-  await prisma.$executeRaw`
-    INSERT INTO master_companies (id, name, aliases, website, status)
-    VALUES
-      (gen_random_uuid(), 'Google', ARRAY['Alphabet'], 'https://google.com', 'active'),
-      (gen_random_uuid(), 'Microsoft', ARRAY['MSFT'], 'https://microsoft.com', 'active'),
-      (gen_random_uuid(), 'Amazon', ARRAY['AWS', 'Amazon Web Services'], 'https://amazon.com', 'active'),
-      (gen_random_uuid(), 'Meta', ARRAY['Facebook', 'Instagram'], 'https://meta.com', 'active'),
-      (gen_random_uuid(), 'Apple', ARRAY[]::text[], 'https://apple.com', 'active'),
-      (gen_random_uuid(), 'Flipkart', ARRAY[]::text[], 'https://flipkart.com', 'active'),
-      (gen_random_uuid(), 'Swiggy', ARRAY[]::text[], 'https://swiggy.com', 'active'),
-      (gen_random_uuid(), 'Zomato', ARRAY[]::text[], 'https://zomato.com', 'active'),
-      (gen_random_uuid(), 'Razorpay', ARRAY[]::text[], 'https://razorpay.com', 'active'),
-      (gen_random_uuid(), 'CRED', ARRAY[]::text[], 'https://cred.club', 'active'),
-      (gen_random_uuid(), 'Paytm', ARRAY['One97 Communications'], 'https://paytm.com', 'active'),
-      (gen_random_uuid(), 'PhonePe', ARRAY[]::text[], 'https://phonepe.com', 'active'),
-      (gen_random_uuid(), 'Infosys', ARRAY[]::text[], 'https://infosys.com', 'active'),
-      (gen_random_uuid(), 'TCS', ARRAY['Tata Consultancy Services'], 'https://tcs.com', 'active'),
-      (gen_random_uuid(), 'Wipro', ARRAY[]::text[], 'https://wipro.com', 'active'),
-      (gen_random_uuid(), 'HCL Technologies', ARRAY['HCL'], 'https://hcltech.com', 'active'),
-      (gen_random_uuid(), 'Accenture', ARRAY[]::text[], 'https://accenture.com', 'active'),
-      (gen_random_uuid(), 'Deloitte', ARRAY[]::text[], 'https://deloitte.com', 'active'),
-      (gen_random_uuid(), 'Goldman Sachs', ARRAY['GS'], 'https://goldmansachs.com', 'active'),
-      (gen_random_uuid(), 'JP Morgan', ARRAY['JPMorgan Chase'], 'https://jpmorgan.com', 'active'),
-      (gen_random_uuid(), 'Ola', ARRAY['Ola Cabs', 'ANI Technologies'], 'https://olacabs.com', 'active'),
-      (gen_random_uuid(), 'Uber', ARRAY[]::text[], 'https://uber.com', 'active'),
-      (gen_random_uuid(), 'Meesho', ARRAY[]::text[], 'https://meesho.com', 'active'),
-      (gen_random_uuid(), 'Dream11', ARRAY[]::text[], 'https://dream11.com', 'active'),
-      (gen_random_uuid(), 'Byju''s', ARRAY['Think and Learn'], 'https://byjus.com', 'active'),
-      (gen_random_uuid(), 'Unacademy', ARRAY[]::text[], 'https://unacademy.com', 'active'),
-      (gen_random_uuid(), 'Zepto', ARRAY[]::text[], 'https://zepto.in', 'active'),
-      (gen_random_uuid(), 'BigBasket', ARRAY[]::text[], 'https://bigbasket.com', 'active'),
-      (gen_random_uuid(), 'Nykaa', ARRAY['FSN E-Commerce'], 'https://nykaa.com', 'active'),
-      (gen_random_uuid(), 'Dunzo', ARRAY[]::text[], 'https://dunzo.com', 'active')
-    ON CONFLICT DO NOTHING
-  `;
+  const companiesData = [
+    { name: 'Google', aliases: ['Alphabet'], logo_url: 'https://logo.clearbit.com/google.com', website: 'https://google.com' },
+    { name: 'Microsoft', aliases: ['MSFT'], logo_url: 'https://logo.clearbit.com/microsoft.com', website: 'https://microsoft.com' },
+    { name: 'Amazon', aliases: ['AWS', 'Amazon Web Services'], logo_url: 'https://logo.clearbit.com/amazon.com', website: 'https://amazon.com' },
+    { name: 'Meta', aliases: ['Facebook', 'Instagram'], logo_url: 'https://logo.clearbit.com/meta.com', website: 'https://meta.com' },
+    { name: 'Apple', aliases: [], logo_url: 'https://logo.clearbit.com/apple.com', website: 'https://apple.com' },
+    { name: 'Flipkart', aliases: [], logo_url: 'https://logo.clearbit.com/flipkart.com', website: 'https://flipkart.com' },
+    { name: 'Swiggy', aliases: [], logo_url: 'https://logo.clearbit.com/swiggy.com', website: 'https://swiggy.com' },
+    { name: 'Zomato', aliases: [], logo_url: 'https://logo.clearbit.com/zomato.com', website: 'https://zomato.com' },
+    { name: 'Razorpay', aliases: [], logo_url: 'https://logo.clearbit.com/razorpay.com', website: 'https://razorpay.com' },
+    { name: 'CRED', aliases: [], logo_url: 'https://logo.clearbit.com/cred.club', website: 'https://cred.club' },
+    { name: 'Paytm', aliases: ['One97 Communications'], logo_url: 'https://logo.clearbit.com/paytm.com', website: 'https://paytm.com' },
+    { name: 'PhonePe', aliases: [], logo_url: 'https://logo.clearbit.com/phonepe.com', website: 'https://phonepe.com' },
+    { name: 'Infosys', aliases: [], logo_url: 'https://logo.clearbit.com/infosys.com', website: 'https://infosys.com' },
+    { name: 'TCS', aliases: ['Tata Consultancy Services'], logo_url: 'https://logo.clearbit.com/tcs.com', website: 'https://tcs.com' },
+    { name: 'Wipro', aliases: [], logo_url: 'https://logo.clearbit.com/wipro.com', website: 'https://wipro.com' },
+    { name: 'HCL Technologies', aliases: ['HCL'], logo_url: 'https://logo.clearbit.com/hcltech.com', website: 'https://hcltech.com' },
+    { name: 'Accenture', aliases: [], logo_url: 'https://logo.clearbit.com/accenture.com', website: 'https://accenture.com' },
+    { name: 'Deloitte', aliases: [], logo_url: 'https://logo.clearbit.com/deloitte.com', website: 'https://deloitte.com' },
+    { name: 'Goldman Sachs', aliases: ['GS'], logo_url: 'https://logo.clearbit.com/goldmansachs.com', website: 'https://goldmansachs.com' },
+    { name: 'JP Morgan', aliases: ['JPMorgan Chase'], logo_url: 'https://logo.clearbit.com/jpmorgan.com', website: 'https://jpmorgan.com' },
+    { name: 'Ola', aliases: ['Ola Cabs', 'ANI Technologies'], logo_url: 'https://logo.clearbit.com/olacabs.com', website: 'https://olacabs.com' },
+    { name: 'Uber', aliases: [], logo_url: 'https://logo.clearbit.com/uber.com', website: 'https://uber.com' },
+    { name: 'Meesho', aliases: [], logo_url: 'https://logo.clearbit.com/meesho.com', website: 'https://meesho.com' },
+    { name: 'Dream11', aliases: [], logo_url: 'https://logo.clearbit.com/dream11.com', website: 'https://dream11.com' },
+    { name: 'Byju\'s', aliases: ['Think and Learn'], logo_url: 'https://logo.clearbit.com/byjus.com', website: 'https://byjus.com' },
+    { name: 'Unacademy', aliases: [], logo_url: 'https://logo.clearbit.com/unacademy.com', website: 'https://unacademy.com' },
+    { name: 'Zepto', aliases: [], logo_url: 'https://logo.clearbit.com/zepto.in', website: 'https://zepto.in' },
+    { name: 'BigBasket', aliases: [], logo_url: 'https://logo.clearbit.com/bigbasket.com', website: 'https://bigbasket.com' },
+    { name: 'Nykaa', aliases: ['FSN E-Commerce'], logo_url: 'https://logo.clearbit.com/nykaa.com', website: 'https://nykaa.com' },
+    { name: 'Dunzo', aliases: [], logo_url: 'https://logo.clearbit.com/dunzo.com', website: 'https://dunzo.com' }
+  ];
+
+  for (const c of companiesData) {
+    const existing = await prisma.masterCompany.findFirst({
+      where: { name: c.name }
+    });
+    if (existing) {
+      await prisma.masterCompany.update({
+        where: { id: existing.id },
+        data: {
+          logo_url: c.logo_url,
+          aliases: c.aliases,
+          website: c.website
+        }
+      });
+    } else {
+      await prisma.masterCompany.create({
+        data: {
+          name: c.name,
+          aliases: c.aliases,
+          logo_url: c.logo_url,
+          website: c.website,
+          status: 'active'
+        }
+      });
+    }
+  }
   const companiesCount = await prisma.masterCompany.count();
   console.log(`  ✅ Seeded companies (total: ${companiesCount})`);
 

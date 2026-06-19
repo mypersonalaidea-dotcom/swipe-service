@@ -22,6 +22,7 @@ model User {
   search_type           String?   @default("both") @db.VarChar(20)
   phone_verified        Boolean?  @default(false)
   email_verified        Boolean?  @default(false)
+  whatsapp_notifications Boolean? @default(true)
   is_published          Boolean?  @default(false)
   last_login_at         DateTime? @db.Timestamptz()
   status                String?   @default("active") @db.VarChar(20)
