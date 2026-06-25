@@ -18,6 +18,15 @@ import { env } from './config/env';
 
 const app: Application = express();
 
+// ─── Trust Proxy ──────────────────────────────────────────────────────────
+// Render (and most PaaS platforms) sit behind a reverse proxy.
+// Setting trust proxy to 1 tells Express to trust the X-Forwarded-For
+// header from exactly one hop (the load balancer), required for
+// express-rate-limit to correctly identify client IPs in production.
+if (env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 // ─── Security Headers ─────────────────────────────────────────────────────
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'same-site' },
@@ -58,6 +67,7 @@ const globalLimiter = rateLimit({
   max: 200,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false }, // suppressed — handled via trust proxy
   message: { success: false, message: 'Too many requests, please try again later.' },
 });
 app.use(globalLimiter);
@@ -68,6 +78,7 @@ const authLimiter = rateLimit({
   max: 20, // max 20 login/signup attempts per 15 minutes
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false }, // suppressed — handled via trust proxy
   message: { success: false, message: 'Too many auth attempts, please try again later.' },
 });
 
